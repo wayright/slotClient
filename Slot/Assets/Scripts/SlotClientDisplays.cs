@@ -15,18 +15,22 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using slotClient;
 
 public class SlotClientDisplays
 {
-    public SlotClientUser User { get; set; }
+    private SlotClientUser m_user = null;
+    public SlotClientUser User
+    {
+        get { return m_user; }
+        set { m_user = value; }
+    }
 
     public void Execute(ProtoPacket packet)
     {
         SlotClientNet.WriteLog("handle cmd from server:" + packet.cmdId);
         switch (packet.cmdId)
         {
-            case SlotConstants.Server_UserInfo:// QuickLoginInfo返回
+            case SlotClientConstants.Server_UserInfo:// QuickLoginInfo返回
                 {
                     Tiger.Info.UserInfo usrInfo = (Tiger.Info.UserInfo)packet.proto;
                     SlotClientNet.WriteLog("Recv proto packet[UserInfo]:\nid=" +
@@ -35,7 +39,7 @@ public class SlotClientDisplays
                     UpdateUserInfo(usrInfo);
                 }
                 break;
-            case SlotConstants.Server_TigerResp: // TigerReq返回
+            case SlotClientConstants.Server_TigerResp: // TigerReq返回
                 {
                     TigerResp tigerResp = (TigerResp)packet.proto;
                     SlotClientNet.WriteLog("Recv proto packet[TigerResp]:\ntiger_no=" +
@@ -48,12 +52,12 @@ public class SlotClientDisplays
                     UpdateTigerResp(tigerResp);                        
                 }
                 break;
-            case SlotConstants.Client_Reconnect:
+            case SlotClientConstants.Client_Reconnect:
                 {
                     SlotClientNet.WriteLog("Reconnecting...");
                 }
                 break;
-            case SlotConstants.Server_Error:
+            case SlotClientConstants.Server_Error:
                 {
                     SlotClientNet.WriteLog("Reconnecting...");
                 }
@@ -67,44 +71,20 @@ public class SlotClientDisplays
     // 更新本地界面和数据，以Update开头
     void UpdateUserInfo(Tiger.Info.UserInfo usrInfo)
     {
-        // 刷新我的金币
-        GameObject gameObj = GameObject.Find("BtnUId");
-        Button btnUId = gameObj.GetComponent<Button>();
-        Text text = btnUId.transform.Find("Text").GetComponent<Text>();
-        text.text = usrInfo.user_id.ToString();
-
-        gameObj = GameObject.Find("BtnUGold");
-        Button btnUGold = gameObj.GetComponent<Button>();
-        text = btnUGold.transform.Find("Text").GetComponent<Text>();
-        text.text = usrInfo.gold.ToString();
-
-        gameObj = GameObject.Find("BtnLines");
-        Button btnLines = gameObj.GetComponent<Button>();
-        text = btnLines.transform.Find("Text").GetComponent<Text>();
-        text.text = User.Lines.ToString();
-
-        gameObj = GameObject.Find("BtnBet");
-        Button btnBet = gameObj.GetComponent<Button>();
-        text = btnBet.transform.Find("Text").GetComponent<Text>();
-        text.text = User.Bet.ToString();
-
         // 刷新数据
-        User.UId = (int)usrInfo.user_id;
-        User.Gold = (int)usrInfo.gold;
-        User.Login = true;
+        m_user.UId = (int)usrInfo.user_id;
+        m_user.Gold = (int)usrInfo.gold;
+        m_user.Login = true;
+
+        // 以下代码用于刷新界面
+        m_user.Bet = m_user.Bet;
+        m_user.Lines = m_user.Lines;
     }
 
     void UpdateTigerResp(TigerResp tigerResp)
     {
         // 本地减金币先
-        // ...
-        User.Gold -= User.Bet;
-        {
-            GameObject gameObj = GameObject.Find("BtnUGold");
-            Button btnUGold = gameObj.GetComponent<Button>();
-            Text text = btnUGold.transform.Find("Text").GetComponent<Text>();
-            text.text = User.Gold.ToString();
-        }
+        m_user.Gold -= m_user.Bet * m_user.Lines;
 
         // 滚动开始
         for (int i = 0; i < tigerResp.pos.Count; ++i)
@@ -112,7 +92,7 @@ public class SlotClientDisplays
             int pos = tigerResp.pos[i];
             string name = "reel" + (i + 1).ToString();
             SlotClientReel reel = GameObject.Find(name).GetComponent<SlotClientReel>();
-            Debug.Log("pos" + i.ToString() + ":" + pos.ToString());
+            //Debug.Log("pos" + i.ToString() + ":" + pos.ToString());
 
             if (i == tigerResp.pos.Count - 1)
                 reel.Spin(pos + 2, tigerResp.bonus);
@@ -123,12 +103,18 @@ public class SlotClientDisplays
         // 中奖效果在Reel中滞后实现
         if (tigerResp.bonus.Count > 0)
         {
-            User.Gold += tigerResp.bonus[0].data1;
+            switch (tigerResp.bonus[0].type)
             {
-                GameObject gameObj = GameObject.Find("BtnUGold");
-                Button btnUGold = gameObj.GetComponent<Button>();
-                Text text = btnUGold.transform.Find("Text").GetComponent<Text>();
-                text.text = User.Gold.ToString();
+                case 1:// 倍数
+                    m_user.Gold += m_user.Bet * tigerResp.bonus[0].data1;
+                    break;
+                case 2:// 金币
+                    m_user.Gold += tigerResp.bonus[0].data1;
+                    break;
+                case 3:// 免费局
+                    break;
+                default:
+                    break;
             }
         }
     }

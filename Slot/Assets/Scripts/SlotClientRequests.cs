@@ -15,37 +15,50 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using slotClient;
 
 public class SlotClientRequests{
-    public SlotClientUser User { get; set; }
-    public SlotClientNet Net { get; set; }
+    private SlotClientUser m_user;
+    private SlotClientNet m_client;
+
+    public SlotClientUser User
+    {
+        get { return m_user; }
+        set { m_user = value; }
+    }
+    public SlotClientNet Client
+    {
+        get { return m_client; }
+        set { m_client = value; }
+    }
    
     // 公共函数-以Req开头
     // 快速登录
     public void ReqQuickLogin()
     {
         QuickLoginInfo quickLoginInfo = new QuickLoginInfo();
-        quickLoginInfo.user_id = User.UId;
-        quickLoginInfo.key = User.Key;
+        if (m_user == null)
+            Debug.Log("user is null");
+        quickLoginInfo.user_id = m_user.UId;
+        quickLoginInfo.key = m_user.Key;
 
-        Net.SendEnqueue(SlotConstants.Client_QuickLoginInfo, 0, quickLoginInfo);
+        m_client.SendEnqueue(SlotClientConstants.Client_QuickLoginInfo, 0, quickLoginInfo);
     }
 
     public void ReqSpin()
     {
-        if (!User.Login)
+        if (!m_user.Login)
         {
             Debug.Log("!Login, cant reqspin");
             return;
         }
 
         TigerReq tigerReq = new TigerReq();
-        tigerReq.bet_gold = User.Bet; // only 10, 20, 30
-        tigerReq.seq_no = User.SeqNo;
-        tigerReq.tiger_no = User.TigerNo;
-        tigerReq.lines.Add(User.Lines);
+        tigerReq.bet_gold = m_user.Bet; // only 10, 20, 30
+        tigerReq.seq_no = m_user.SeqNo;
+        tigerReq.tiger_no = m_user.TigerNo;
+        for (int i = 0; i < m_user.Lines; ++i )
+            tigerReq.lines.Add(i);
 
-        Net.SendEnqueue(SlotConstants.Client_TigerReq, 0, tigerReq);        
+        m_client.SendEnqueue(SlotClientConstants.Client_TigerReq, 0, tigerReq);        
     }
 }

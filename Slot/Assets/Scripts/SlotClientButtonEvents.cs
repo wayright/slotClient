@@ -6,20 +6,15 @@ using UnityEngine.UI;
 
 public class SlotClientButtonEvents : MonoBehaviour {
     public System.Random rd = new System.Random(); // Test
+    private Dictionary<string, int> m_btnIndexDict = new Dictionary<string,int>();
 	// Use this for initialization
 	void Start () {
-        List<string> btnsName = new List<string>();
-        btnsName.Add("BtnSpin");
-        btnsName.Add("BtnLineMinus");
-        btnsName.Add("BtnLineAdd");
-        btnsName.Add("BtnBetMinus");
-        btnsName.Add("BtnBetAdd");
-        btnsName.Add("BtnMaxBet");
-        btnsName.Add("BtnReturn"); // 返回
-        btnsName.Add("BtnDeposit"); // 购买充值
-
-        foreach (string btnName in btnsName)
+        // 为所有按钮添加点击事件
+        // 部分没有点击事件
+        for (int i = 0; i < SlotClientConstants.Btn_Strings.Length;++i )
         {
+            string btnName = SlotClientConstants.Btn_Strings[i];
+            m_btnIndexDict.Add(btnName, i);
             GameObject btnObj = GameObject.Find(btnName);
             Button btn = btnObj.GetComponent<Button>();
             btn.onClick.AddListener(delegate()
@@ -31,25 +26,40 @@ public class SlotClientButtonEvents : MonoBehaviour {
 
     public void OnClick(GameObject sender)
     {
-        switch (sender.name)
+        int btnIndex = GetBtnIndexFromName(sender.name);
+        if (btnIndex < 0)
         {
-            case "BtnSpin":
-                Debug.Log("BtnSpin");
+            Debug.Log("Cant find button:" + sender.name);
+            return;
+        }
+
+        Debug.Log("You click button:" + sender.name);
+        switch ((SlotClientConstants.Btn)btnIndex)
+        {
+            case SlotClientConstants.Btn.Btn_Spin:
+                
                 //SlotClientRequests slotClientReq = GameObject.Find("BtnSpin").GetComponent<SlotClientRequests>();
                 SlotClientUser slotClientUser = GameObject.Find("SlotClientUser").GetComponent<SlotClientUser>();
                 slotClientUser.Requests.ReqSpin();
                 break;
-            case "BtnShop":
-                Debug.Log("BtnShop");
-                break;
-            case "BtnLineMinus":
-                Debug.Log("BtnLineMinus");
+            case SlotClientConstants.Btn.Btn_LineMinus:
                 break;
             default:
-                Debug.Log("none");
                 break;
         }
-    }  
+    }
+
+    int GetBtnIndexFromName(string btnName)
+    {
+        if (m_btnIndexDict.ContainsKey(btnName))
+        {
+            return m_btnIndexDict[btnName];
+        }
+        else
+        {
+            return -1;
+        }
+    }
     
 	// Update is called once per frame
 	void Update () {

@@ -21,11 +21,11 @@ public class SlotClientReel : MonoBehaviour
     }
 
     private ScrollRect m_scrollRect;
-    private Vector3 m_initPosition;
+    private Vector3 m_initPosition; // 原始位置
     private float m_timer = 2.0f; // 滚动计时器
-    private float m_bonusTimer = 0.0f; // bonus计时器
-    private float m_speed = 0; // 速度
-    public int m_item = 1; // 项索引    
+    private float m_bonusTimer = 0.0f; // bonus计时器，过时间对话框消失
+    private float m_speed = 0; // 股东速度
+    public int m_item = 1; // 摇中的项索引    
     private float m_a1 = 10; // 加速度1
     private float m_a2 = 10; // 加速度2
     private float m_a3 = 10; // 加速度3
@@ -53,6 +53,32 @@ public class SlotClientReel : MonoBehaviour
 
         //Debug.Log("PosY Init=" + m_scrollRect.content.localPosition.y);
 	}
+
+    void SpeedDown()
+    {
+        float a = m_a1;
+        if (m_speed > 20)
+        {
+            a = m_a1;
+        }
+        else if (m_speed > 10)
+        {
+            a = m_a2;
+        }
+        else
+        {
+            a = m_a3;
+        }
+
+        if (m_speed > 60)
+        {
+            m_speed -= a;
+        }
+        else
+        {
+            m_return = true;
+        }
+    }
 	
 	// Update is called once per frame
 	void Update () {
