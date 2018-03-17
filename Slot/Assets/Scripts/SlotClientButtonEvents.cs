@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class SlotClientButtonEvents : MonoBehaviour {
     public System.Random rd = new System.Random(); // Test
     private Dictionary<string, int> m_btnIndexDict = new Dictionary<string,int>();
+    private SlotClientUser m_user = null;
 	// Use this for initialization
 	void Start () {
         // 为所有按钮添加点击事件
@@ -21,7 +22,9 @@ public class SlotClientButtonEvents : MonoBehaviour {
             {
                 this.OnClick(btnObj);
             });
-        }   	
+        }
+
+        m_user = GameObject.Find("SlotClientUser").GetComponent<SlotClientUser>();
 	}
 
     public void OnClick(GameObject sender)
@@ -34,15 +37,21 @@ public class SlotClientButtonEvents : MonoBehaviour {
         }
 
         Debug.Log("You click button:" + sender.name);
+        
         switch ((SlotClientConstants.Btn)btnIndex)
         {
             case SlotClientConstants.Btn.Btn_Spin:
-                
-                //SlotClientRequests slotClientReq = GameObject.Find("BtnSpin").GetComponent<SlotClientRequests>();
-                SlotClientUser slotClientUser = GameObject.Find("SlotClientUser").GetComponent<SlotClientUser>();
-                slotClientUser.Requests.ReqSpin();
+                OnButtonSpin();                
                 break;
             case SlotClientConstants.Btn.Btn_LineMinus:
+                break;
+            case SlotClientConstants.Btn.Btn_LineAdd:
+                break;
+            case SlotClientConstants.Btn.Btn_BetAdd:
+                OnButtonBetAdd();
+                break;
+            case SlotClientConstants.Btn.Btn_BetMinus:
+                OnButtonBetMinus();
                 break;
             default:
                 break;
@@ -65,4 +74,52 @@ public class SlotClientButtonEvents : MonoBehaviour {
 	void Update () {
 		
 	}
+    void OnButtonSpin()
+    {
+        if (m_user.Spinning)
+        {
+            Debug.Log("I'm spinning!");
+            return;
+        }
+        else
+        {
+            m_user.Spinning = true;
+        }
+
+        if (m_user.Win > 0) // 有奖励没有领取
+        {
+            Debug.Log("Error!"); // 当前是自动领取
+            m_user.Displays.ShowJumpWin(); // 点击领取
+        }
+        else
+        {
+            m_user.Requests.ReqSpin();
+        }
+    }
+    void OnButtonBetAdd()
+    {
+        int bet = m_user.Bet;
+        if (bet == 30)
+        {
+            bet = 10;
+        }
+        else
+        {
+            bet += 10;
+        }
+        m_user.Bet = bet;
+    }
+    void OnButtonBetMinus()
+    {
+        int bet = m_user.Bet;
+        if (bet == 10)
+        {
+            bet = 30;
+        }
+        else
+        {
+            bet -= 10;
+        }
+        m_user.Bet = bet;
+    }
 }

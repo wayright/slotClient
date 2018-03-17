@@ -15,9 +15,11 @@ public class SlotClientUser : MonoBehaviour {
     private int m_tigerNo; // 机器编号
     private int m_seqNo; // 前端序号
     private bool m_login; // 是否登录
+    private int m_win; // 中奖金币
     private SlotClientNet m_client; // 网络客户端
     private SlotClientDisplays m_displays; // 展示器
     private SlotClientRequests m_requests; // 请求器
+    private bool m_spinning = false; // 是否正在摇
 
 	// Use this for initialization
 	void Start () {
@@ -30,6 +32,7 @@ public class SlotClientUser : MonoBehaviour {
         m_client = new SlotClientNet();
         m_login = false;
         m_lines = 1;
+        m_win = 0;
 
         // 启动登录
         if (false == m_client.Init("182.92.74.240", 7878))
@@ -38,7 +41,8 @@ public class SlotClientUser : MonoBehaviour {
         }
 
         // 初始化Displays
-        m_displays = new SlotClientDisplays();
+        //m_displays = new SlotClientDisplays(); // MonoBehaviour不可以new
+        m_displays = GameObject.Find("SlotClientDisplays").GetComponent<SlotClientDisplays>();
         m_displays.User = this;
 
         // 初始化Requests
@@ -137,6 +141,11 @@ public class SlotClientUser : MonoBehaviour {
         get { return m_gold; }
         set { m_gold = value; OnBtnChanged(SlotClientConstants.Btn.Btn_UGold, m_gold); }
     }
+    public int Win
+    {
+        get { return m_win; }
+        set { m_win = value; OnBtnChanged(SlotClientConstants.Btn.Btn_Win, m_win); }
+    }
     public SlotClientNet Client
     {
         get { return m_client; }
@@ -145,6 +154,11 @@ public class SlotClientUser : MonoBehaviour {
     {
         get { return m_login; }
         set { m_login = value; }
+    }
+    public bool Spinning
+    {
+        get { return m_spinning; }
+        set { m_spinning = value; }
     }
     public SlotClientRequests Requests { get { return m_requests; } }
     public SlotClientDisplays Displays { get { return m_displays; } }

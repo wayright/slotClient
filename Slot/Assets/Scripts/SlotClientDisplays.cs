@@ -15,10 +15,51 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using UnityEngine.Events;
 
-public class SlotClientDisplays
+// 跳动数字效果展示
+public class JumpNumberData
+{
+    public const int JumpTypeWin = 0;
+    public const int JumpTypeGold = 1;
+    public int From
+    {
+        get { return m_from; }
+        set { m_from = value; }
+    }
+
+    public int To
+    {
+        get { return m_to; }
+        set { m_to = value; }
+    }
+    public int Result
+    {
+        get { return m_result; }
+        set { m_result = value; }
+    }
+    public int JumpTimes
+    {
+        get { return m_jumpTimes; }
+        set { m_jumpTimes = value; }
+    }
+    public int Type
+    {
+        get { return m_type; }
+        set { m_type = value; }
+    }
+
+    private int m_from = 0;
+    private int m_to = 0;
+    private int m_jumpTimes = 1;
+    private int m_result = 0;
+    private int m_type = 0; // 0-win, 1-gold
+}
+
+public class SlotClientDisplays : MonoBehaviour
 {
     private SlotClientUser m_user = null;
+    private JumpNumberData m_jndWin = null, m_jndGold = null;
     public SlotClientUser User
     {
         get { return m_user; }
@@ -101,21 +142,85 @@ public class SlotClientDisplays
         }
 
         // 中奖效果在Reel中滞后实现
-        if (tigerResp.bonus.Count > 0)
+    }
+
+    public void ShowJumpWin()
+    {
+        if (null == m_jndWin)
+            m_jndWin = new JumpNumberData();
+
+        m_jndWin.From = m_user.Win;
+        m_jndWin.To = 0;
+        m_jndWin.JumpTimes = 60;
+        m_jndWin.Type = JumpNumberData.JumpTypeWin;
+
+        if (null == m_jndGold)
+            m_jndGold = new JumpNumberData();
+        m_jndGold.From = m_user.Gold;
+        m_jndGold.To = m_user.Gold + m_user.Win;
+        m_jndGold.JumpTimes = 60;
+        m_jndGold.Type = JumpNumberData.JumpTypeGold;
+
+        StartCoroutine(JumpWinNumber(m_jndWin));
+        StartCoroutine(JumpWinNumber(m_jndGold));
+    }
+    public IEnumerator JumpWinNumber(JumpNumberData data)
+    {
+        int step = 1;
+        bool increase = true;
+        int total = 0;
+        if (data.From > data.To)
         {
-            switch (tigerResp.bonus[0].type)
-            {
-                case 1:// 倍数
-                    m_user.Gold += m_user.Bet * tigerResp.bonus[0].data1;
-                    break;
-                case 2:// 金币
-                    m_user.Gold += tigerResp.bonus[0].data1;
-                    break;
-                case 3:// 免费局
-                    break;
-                default:
-                    break;
-            }
+            increase = false;
+            total = data.From - data.To;
         }
+        else
+        {
+            total = data.To - data.From;
+        }
+
+        if (data.JumpTimes <= 0)
+            data.JumpTimes = 1;
+
+        if (total > data.JumpTimes)
+        {
+            step = total / data.JumpTimes;
+        }
+        else
+        {
+            data.JumpTimes = total;
+        }
+
+        data.Result = data.From;
+
+        for (int i = 0; i < data.JumpTimes; i++)
+        {
+            if (increase)
+                data.Result += step;
+            else
+                data.Result -= step;
+
+            if (data.Type == JumpNumberData.JumpTypeWin)
+                m_user.Win = data.Result;
+            else if (data.Type == JumpNumberData.JumpTypeGold)
+                m_user.Gold = data.Result;
+
+            yield return 1;
+        }
+        
+        data.Result = data.To;
+        if (data.Type == JumpNumberData.JumpTypeWin)
+        {
+            Debug.Log("Finish win show!");
+            m_user.Win = data.Result;
+        }
+        else if (data.Type == JumpNumberData.JumpTypeGold)
+        {
+            Debug.Log("Finish gold show!");
+            m_user.Gold = data.Result;
+            m_user.Spinning = false;
+        }
+
+        StopCoroutine(JumpWinNumber(data));
     }
 }

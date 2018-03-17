@@ -12,8 +12,10 @@ public class SlotClientReel : MonoBehaviour
         m_item = item > 5 ? item % 5 : item;
 
         //Debug.Log(ItemStringArray[m_item]);
-        m_timer = 2.0f;
-        m_bonus.Clear();
+        m_timer = 2.0f; // 滚动2秒
+
+        if (m_bonus != null)
+            m_bonus.Clear();
         if (bonus != null)
         {
             m_bonus = bonus;
@@ -24,17 +26,17 @@ public class SlotClientReel : MonoBehaviour
     private Vector3 m_initPosition; // 原始位置
     private float m_timer = 2.0f; // 滚动计时器
     private float m_bonusTimer = 0.0f; // bonus计时器，过时间对话框消失
-    private float m_speed = 0; // 股东速度
-    public int m_item = 1; // 摇中的项索引    
+    private float m_speed = 0; // 滚东速度
+    private int m_item = 1; // 摇中的项索引    
     private float m_a1 = 10; // 加速度1
     private float m_a2 = 10; // 加速度2
     private float m_a3 = 10; // 加速度3
     public const int StartPositionY = -1143; // 第二个在中间
     public const int ItemHeight = 235;
     public static string[] ItemStringArray = { "None", "东", "南", "西", "北", "中" };
-    public int[] m_posYArray = new int[6];
+    private int[] m_posYArray = new int[6];
     private bool m_return = false;
-    private List<Tiger.Info.TigerBonus> m_bonus = new List<Tiger.Info.TigerBonus>(); // 奖励，最后一个才有
+    private List<Tiger.Info.TigerBonus> m_bonus = null; // 奖励，最后一个才有
   
 	// Use this for initialization
 	void Start () {
@@ -115,6 +117,9 @@ public class SlotClientReel : MonoBehaviour
                 GameObject canvas = GameObject.Find("Canvas");
                 GameObject bonusDialog = canvas.transform.Find("BonusDialog").gameObject;
                 bonusDialog.SetActive(false);
+
+                SlotClientUser user = GameObject.Find("SlotClientUser").GetComponent<SlotClientUser>();
+                user.Displays.ShowJumpWin();
             }
         }
 
@@ -129,29 +134,53 @@ public class SlotClientReel : MonoBehaviour
                 m_scrollRect.content.localPosition = pos;
                 m_speed = 0;
 
-                if (m_bonus.Count > 0)
+                if (m_bonus != null)
                 {
-                    GameObject canvas = GameObject.Find("Canvas");
-                    GameObject bonusDialog = canvas.transform.Find("BonusDialog").gameObject;
-                    Image img = bonusDialog.GetComponent<Image>();
-                    Text text = img.transform.Find("Text").GetComponent<Text>();
-                    text.text = "Bonus:\n";
-                    for (int i = 0; i < m_bonus.Count; ++i )
+                    SlotClientUser user = GameObject.Find("SlotClientUser").GetComponent<SlotClientUser>();
+                    if (m_bonus.Count == 0)
                     {
-                        Tiger.Info.TigerBonus bonus = m_bonus[i];
-                        text.text += "payline=" + bonus.line.ToString();
-                        text.text += "\npattern=" + bonus.pattern.ToString();
-                        text.text += "\ntype=" + bonus.type.ToString();
-                        text.text += "\ndata1=" + bonus.data1.ToString();
-                        text.text += "\ndata2=" + bonus.data2.ToString();
-
-                        if (i < m_bonus.Count - 1)
-                        {
-                            text.text += "\n";
-                        }
+                        // 没有奖励，可以继续摇了
+                        user.Spinning = false;
                     }
-                    bonusDialog.SetActive(true);
-                    m_bonusTimer = 3.0f;
+                    else
+                    {
+                        GameObject canvas = GameObject.Find("Canvas");
+                        GameObject bonusDialog = canvas.transform.Find("BonusDialog").gameObject;
+                        Image img = bonusDialog.GetComponent<Image>();
+                        Text text = img.transform.Find("Text").GetComponent<Text>();
+                        text.text = "Bonus:\n";
+                        for (int i = 0; i < m_bonus.Count; ++i)
+                        {
+                            Tiger.Info.TigerBonus bonus = m_bonus[i];
+                            text.text += "payline=" + bonus.line.ToString();
+                            text.text += "\npattern=" + bonus.pattern.ToString();
+                            text.text += "\ntype=" + bonus.type.ToString();
+                            text.text += "\ndata1=" + bonus.data1.ToString();
+                            text.text += "\ndata2=" + bonus.data2.ToString();
+
+                            if (i < m_bonus.Count - 1)
+                            {
+                                text.text += "\n";
+                            }
+
+                            // 回调Display，更新金币数 
+                            switch (bonus.type)
+                            {
+                                case 1:// 倍数
+                                    user.Win = user.Bet * bonus.data1;
+                                    break;
+                                case 2:// 金币
+                                    user.Win += bonus.data1;
+                                    break;
+                                case 3:
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        bonusDialog.SetActive(true);
+                        m_bonusTimer = 2.0f; // bonus展示                     
+                    }
                 }
             }
 
