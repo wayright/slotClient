@@ -20,6 +20,7 @@ public class SlotClientUser : MonoBehaviour {
     private SlotClientDisplays m_displays; // 展示器
     private SlotClientRequests m_requests; // 请求器
     private bool m_spinning = false; // 是否正在摇
+    private bool m_autoSpin = false; // 自动摇奖
 
 	// Use this for initialization
 	void Start () {
@@ -59,7 +60,7 @@ public class SlotClientUser : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {        
+	void Update () {
         ProtoPacket packet = new ProtoPacket();
         if (m_client.RecvTryDequeue(ref packet))
         {
@@ -159,6 +160,11 @@ public class SlotClientUser : MonoBehaviour {
     {
         get { return m_spinning; }
         set { m_spinning = value; }
+    }
+    public bool AutoSpin
+    {
+        get { return m_autoSpin; }
+        set { m_autoSpin = value; }
     }
     public SlotClientRequests Requests { get { return m_requests; } }
     public SlotClientDisplays Displays { get { return m_displays; } }

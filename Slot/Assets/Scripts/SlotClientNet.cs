@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using ProtoBuf;
 using Login;
 using User;
-using Tiger.Info;
+using Tiger.Proto;
 using System.IO;
 using System.Text;
 using System;
@@ -417,8 +417,8 @@ public class SlotClientNet
                 case SlotClientConstants.Server_UserInfo:
                     {
                         MemoryStream ms = new MemoryStream(Body, 0, Body.Length);
-                        Tiger.Info.UserInfo usrInfo
-                            = new PBMessageSerializer().Deserialize(ms, null, typeof(Tiger.Info.UserInfo)) as Tiger.Info.UserInfo;
+                        UserInfo usrInfo
+                            = new PBMessageSerializer().Deserialize(ms, null, typeof(UserInfo)) as UserInfo;
                                                         
                         if (usrInfo != null)
                         {

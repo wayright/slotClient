@@ -8,6 +8,7 @@ public class SlotClientButtonEvents : MonoBehaviour {
     public System.Random rd = new System.Random(); // Test
     private Dictionary<string, int> m_btnIndexDict = new Dictionary<string,int>();
     private SlotClientUser m_user = null;
+    private int m_spinCheck = 0; // 检查金币是否有误
 	// Use this for initialization
 	void Start () {
         // 为所有按钮添加点击事件
@@ -53,6 +54,10 @@ public class SlotClientButtonEvents : MonoBehaviour {
             case SlotClientConstants.Btn.Btn_BetMinus:
                 OnButtonBetMinus();
                 break;
+            case SlotClientConstants.Btn.Btn_AutoSpin:
+                m_user.AutoSpin = !m_user.AutoSpin;
+                m_user.Displays.PlayAudio(SlotClientConstants.Audio.Audio_Spin);
+                break;
             default:
                 break;
         }
@@ -72,10 +77,25 @@ public class SlotClientButtonEvents : MonoBehaviour {
     
 	// Update is called once per frame
 	void Update () {
-		
+        if (m_user.AutoSpin && !m_user.Spinning && m_user.Login)
+        {
+            if (m_spinCheck > 0 && m_spinCheck % 10 == 0)
+            {
+                // 重新登录检查金币是否准确
+                m_spinCheck = 0;
+                m_user.Login = false;
+                m_user.Requests.ReqQuickLogin();
+            }
+            else
+            {
+                OnButtonSpin();
+            }
+        }
 	}
     void OnButtonSpin()
     {
+        m_user.Displays.PlayAudio(SlotClientConstants.Audio.Audio_Spin);
+        
         if (m_user.Spinning)
         {
             Debug.Log("I'm spinning!");
@@ -83,6 +103,8 @@ public class SlotClientButtonEvents : MonoBehaviour {
         }
         else
         {
+            m_user.SpinCount++;
+            m_spinCheck = m_user.SpinCount;
             m_user.Spinning = true;
         }
 
@@ -98,6 +120,7 @@ public class SlotClientButtonEvents : MonoBehaviour {
     }
     void OnButtonBetAdd()
     {
+        m_user.Displays.PlayAudio(SlotClientConstants.Audio.Audio_PlusMinus);
         int bet = m_user.Bet;
         if (bet == 30)
         {
@@ -111,6 +134,7 @@ public class SlotClientButtonEvents : MonoBehaviour {
     }
     void OnButtonBetMinus()
     {
+        m_user.Displays.PlayAudio(SlotClientConstants.Audio.Audio_PlusMinus);
         int bet = m_user.Bet;
         if (bet == 10)
         {

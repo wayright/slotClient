@@ -7,7 +7,7 @@ using ProtoBuf;
 using Login;
 using User;
 using Common;
-using Tiger.Info;
+using Tiger.Proto;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -65,30 +65,39 @@ public class SlotClientDisplays : MonoBehaviour
         get { return m_user; }
         set { m_user = value; }
     }
+    void Start() 
+    {
+        // 隐藏金币
+        GameObject gameObj = GameObject.Find("Coin");
+        Image img = gameObj.GetComponent<Image>();
+        img.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+    }
 
     public void Execute(ProtoPacket packet)
     {
-        SlotClientNet.WriteLog("handle cmd from server:" + packet.cmdId);
+        //SlotClientNet.WriteLog("handle cmd from server:" + packet.cmdId);
         switch (packet.cmdId)
         {
             case SlotClientConstants.Server_UserInfo:// QuickLoginInfo返回
                 {
-                    Tiger.Info.UserInfo usrInfo = (Tiger.Info.UserInfo)packet.proto;
+                    UserInfo usrInfo = (UserInfo)packet.proto;
+                    /*
                     SlotClientNet.WriteLog("Recv proto packet[UserInfo]:\nid=" +
                         usrInfo.user_id + "\ngold=" + usrInfo.gold);
-
+                    */
                     UpdateUserInfo(usrInfo);
                 }
                 break;
             case SlotClientConstants.Server_TigerResp: // TigerReq返回
                 {
                     TigerResp tigerResp = (TigerResp)packet.proto;
+                    /*
                     SlotClientNet.WriteLog("Recv proto packet[TigerResp]:\ntiger_no=" +
                         tigerResp.tiger_no +
                         "\nseq_no=" + tigerResp.seq_no +
                         "\npos=" + tigerResp.pos.ToString() +
                         "\nbonus=" + tigerResp.bonus +
-                        "\npos=" + tigerResp.pos);
+                        "\npos=" + tigerResp.pos);*/
 
                     UpdateTigerResp(tigerResp);                        
                 }
@@ -110,10 +119,18 @@ public class SlotClientDisplays : MonoBehaviour
     }
 
     // 更新本地界面和数据，以Update开头
-    void UpdateUserInfo(Tiger.Info.UserInfo usrInfo)
+    void UpdateUserInfo(UserInfo usrInfo)
     {
         // 刷新数据
         m_user.UId = (int)usrInfo.user_id;
+        if (m_user.Gold != 0 && m_user.Gold != (int)usrInfo.gold)
+        {
+            Debug.Log("Gold cant match!!!");
+        }
+        else
+        {
+            Debug.Log("Gold can match!!!");
+        }
         m_user.Gold = (int)usrInfo.gold;
         m_user.Login = true;
 
@@ -128,6 +145,7 @@ public class SlotClientDisplays : MonoBehaviour
         m_user.Gold -= m_user.Bet * m_user.Lines;
 
         // 滚动开始
+        PlayAudio(SlotClientConstants.Audio.Audio_ReelRolling);
         for (int i = 0; i < tigerResp.pos.Count; ++i)
         {
             int pos = tigerResp.pos[i];
@@ -211,16 +229,45 @@ public class SlotClientDisplays : MonoBehaviour
         data.Result = data.To;
         if (data.Type == JumpNumberData.JumpTypeWin)
         {
-            Debug.Log("Finish win show!");
             m_user.Win = data.Result;
         }
         else if (data.Type == JumpNumberData.JumpTypeGold)
         {
-            Debug.Log("Finish gold show!");
             m_user.Gold = data.Result;
             m_user.Spinning = false;
+
+            // 隐藏金币
+            GameObject coin = GameObject.Find("Coin");
+            Image coinImg = coin.GetComponent<Image>();
+            coinImg.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+            coin.transform.localPosition = new Vector3(385, -379, 0);
         }
 
         StopCoroutine(JumpWinNumber(data));
+    }
+
+    public void PlayAudio(SlotClientConstants.Audio aud)
+    {
+        if (aud >= SlotClientConstants.Audio.Audio_Max)
+        {
+            Debug.Log("Ivalid audio enum");
+            return;
+        }
+
+        string audStr = SlotClientConstants.Audio_Strings[(int)aud];
+        AudioSource aSource = transform.Find(audStr).GetComponent<AudioSource>();
+        aSource.Play();
+    }
+    public void StopAudio(SlotClientConstants.Audio aud)
+    {
+        if (aud >= SlotClientConstants.Audio.Audio_Max)
+        {
+            Debug.Log("Ivalid audio enum");
+            return;
+        }
+
+        string audStr = SlotClientConstants.Audio_Strings[(int)aud];
+        AudioSource aSource = transform.Find(audStr).GetComponent<AudioSource>();
+        aSource.Stop();
     }
 }

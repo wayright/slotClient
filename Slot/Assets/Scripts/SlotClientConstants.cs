@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 public class SlotClientConstants{
     // 客户端
-    public const int Client_QuickLoginInfo = 1002; // 快速登录
+    public const int Client_QuickLoginInfo = 1000; // 快速登录
     public const int Client_TigerReq = 10000;// spin请求
     public const int Client_Reconnect = 99999; // 本地重连
 
     // 服务器
-    public const int Server_UserInfo = 1002;// 用户信息（快速登录返回）
+    public const int Server_UserInfo = 1000;// 用户信息（快速登录返回）
     public const int Server_TigerResp = 10000;// spin返回
     public const int Server_Error = -1;// 服务器错误
 
@@ -29,6 +29,7 @@ public class SlotClientConstants{
         Btn_Lines, // 线数
         Btn_Bet, // 注数
         Btn_Win, // 赢金币数
+        Btn_AutoSpin, // 自动摇
     }
 
     public static string[] Btn_Strings = 
@@ -46,6 +47,34 @@ public class SlotClientConstants{
         "BtnSetting",
         "BtnLines",
         "BtnBet",
-        "BtnWin"
+        "BtnWin",
+        "BtnAutoSpin"
+    };
+
+    public enum Audio
+    {
+        Audio_Spin = 0,
+        Audio_ReelRolling,
+        Audio_3Cheer,
+        Audio_4Cheer,
+        Audio_5Cheer,
+        Audio_AutoSpin,
+        Audio_ReelStop,
+        Audio_CoinFly,
+        Audio_PlusMinus,
+        Audio_Max,
+    }
+
+    public static string[] Audio_Strings = 
+    {
+        "Spin",
+        "ReelRolling",
+        "3Cheer",
+        "4Cheer",
+        "5Cheer",
+        "AutoSpin",
+        "ReelStop",
+        "CoinFly",
+        "PlusMinus"
     };
 }
