@@ -142,7 +142,7 @@ GameObject:
   - component: {fileID: 114750617242309270}
   - component: {fileID: 114392520594685126}
   - component: {fileID: 114093644982101468}
-  - component: {fileID: 114998278700259398}
+  - component: {fileID: 114264580894918764}
   m_Layer: 5
   m_Name: reel
   m_TagString: Untagged
@@ -301,6 +301,18 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114264580894918764
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1656308790661640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85d967ef160818e45bfb8a008afcc998, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RollingTime: 0
 --- !u!114 &114274784287659252
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -521,18 +533,6 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
---- !u!114 &114998278700259398
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1656308790661640}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2b15739b7d193ef4cb1ce0acd9c360e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  RollingTime: 1.5
 --- !u!222 &222106958056349046
 CanvasRenderer:
   m_ObjectHideFlags: 1

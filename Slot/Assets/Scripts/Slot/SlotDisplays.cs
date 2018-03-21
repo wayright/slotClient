@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using ProtoBuf;
-using Login;
+using Login.Proto;
 using User;
 using Common;
+//using Dog.Proto;
 using Tiger.Proto;
 using System.IO;
 using System.Text;
@@ -22,23 +23,23 @@ public class JumpNumberData
 {
     public const int JumpTypeWin = 0;
     public const int JumpTypeGold = 1;
-    public int From
+    public long From
     {
         get { return m_from; }
         set { m_from = value; }
     }
 
-    public int To
+    public long To
     {
         get { return m_to; }
         set { m_to = value; }
     }
-    public int Result
+    public long Result
     {
         get { return m_result; }
         set { m_result = value; }
     }
-    public int JumpTimes
+    public long JumpTimes
     {
         get { return m_jumpTimes; }
         set { m_jumpTimes = value; }
@@ -49,21 +50,43 @@ public class JumpNumberData
         set { m_type = value; }
     }
 
-    private int m_from = 0;
-    private int m_to = 0;
-    private int m_jumpTimes = 1;
-    private int m_result = 0;
+    private long m_from = 0;
+    private long m_to = 0;
+    private long m_jumpTimes = 1;
+    private long m_result = 0;
     private int m_type = 0; // 0-win, 1-gold
 }
-
-public class SlotClientDisplays : MonoBehaviour
+public class DelayWork
 {
-    private SlotClientUser m_user = null;
-    private JumpNumberData m_jndWin = null, m_jndGold = null;
-    public SlotClientUser User
+    private float m_elapse;
+
+    public float Elapse
     {
-        get { return m_user; }
-        set { m_user = value; }
+        get { return m_elapse; }
+        set { m_elapse = value; }
+    }
+
+    public bool Active()
+    {
+        return m_elapse > 0;
+    }
+
+    public bool Step()
+    {
+        m_elapse -= Time.deltaTime;
+        return Active();
+    }
+}
+
+public class SlotDisplays : MonoBehaviour
+{
+    private SlotClerk m_clerk = null;
+    private JumpNumberData m_jndWin = null, m_jndGold = null;
+    private DelayWork m_dw = new DelayWork();
+    public SlotClerk User
+    {
+        get { return m_clerk; }
+        set { m_clerk = value; }
     }
     void Start() 
     {
@@ -71,14 +94,27 @@ public class SlotClientDisplays : MonoBehaviour
         GameObject gameObj = GameObject.Find("Coin");
         Image img = gameObj.GetComponent<Image>();
         img.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+
+        m_dw.Elapse = 0;
+    }
+
+    void Update()
+    {
+        if (m_dw.Active())
+        {
+            if (!m_dw.Step())
+            {
+                m_clerk.Net.Init("127.0.0.1", 7879);
+            }
+        }
     }
 
     public void Execute(ProtoPacket packet)
     {
-        //SlotClientNet.WriteLog("handle cmd from server:" + packet.cmdId);
+        ProtoNet.WriteLog("handle cmd from server:" + packet.cmdId);
         switch (packet.cmdId)
         {
-            case SlotClientConstants.Server_UserInfo:// QuickLoginInfo返回
+            case Constants.Server_UserInfo:// QuickLoginInfo返回
                 {
                     UserInfo usrInfo = (UserInfo)packet.proto;
                     /*
@@ -88,7 +124,7 @@ public class SlotClientDisplays : MonoBehaviour
                     UpdateUserInfo(usrInfo);
                 }
                 break;
-            case SlotClientConstants.Server_TigerResp: // TigerReq返回
+            case Constants.Server_TigerResp: // TigerReq返回
                 {
                     TigerResp tigerResp = (TigerResp)packet.proto;
                     /*
@@ -101,29 +137,39 @@ public class SlotClientDisplays : MonoBehaviour
 
                     UpdateTigerResp(tigerResp);                        
                 }
-                break;
-            case SlotClientConstants.Client_Reconnect:
+                break;           
+            case Constants.Client_Reconnect:
                 {
-                    SlotClientNet.WriteLog("Reconnecting...");
+                    ProtoNet.WriteLog("Reconnecting...");
+                    if (packet.msgId > 0)
+                    {
+                        // 3s后Display中重连
+                        m_dw.Elapse = 3;
+                    }
                 }
                 break;
-            case SlotClientConstants.Server_Error:
+            case Constants.Server_Error:
                 {
-                    SlotClientNet.WriteLog("Reconnecting...");
+                    ProtoNet.WriteLog("Reconnecting...");
                 }
                 break;
             default:
-                SlotClientNet.WriteLog("Unknown send cmd");
+                ProtoNet.WriteLog("Unknown send cmd");
                 break;
         }
-    }
 
+        if (m_clerk.CallbackDict.ContainsKey(packet.cmdId))
+        {
+            ProtoNet.WriteLog("Callback:" + packet.cmdId);
+            m_clerk.CallBack(m_clerk.CallbackDict[packet.cmdId], packet.proto);
+        }
+    }
     // 更新本地界面和数据，以Update开头
     void UpdateUserInfo(UserInfo usrInfo)
     {
         // 刷新数据
-        m_user.UId = (int)usrInfo.user_id;
-        if (m_user.Gold != 0 && m_user.Gold != (int)usrInfo.gold)
+        m_clerk.UId = usrInfo.user_id;
+        if (m_clerk.Gold != 0 && m_clerk.Gold != usrInfo.gold)
         {
             Debug.Log("Gold cant match!!!");
         }
@@ -131,26 +177,26 @@ public class SlotClientDisplays : MonoBehaviour
         {
             Debug.Log("Gold can match!!!");
         }
-        m_user.Gold = (int)usrInfo.gold;
-        m_user.Login = true;
+        m_clerk.Gold = usrInfo.gold;
+        m_clerk.Login = true;
 
         // 以下代码用于刷新界面
-        m_user.Bet = m_user.Bet;
-        m_user.Lines = m_user.Lines;
+        m_clerk.Bet = m_clerk.Bet;
+        m_clerk.Lines = m_clerk.Lines;
     }
 
     void UpdateTigerResp(TigerResp tigerResp)
     {
         // 本地减金币先
-        m_user.Gold -= m_user.Bet * m_user.Lines;
+        m_clerk.Gold -= m_clerk.Bet * m_clerk.Lines;
 
         // 滚动开始
-        PlayAudio(SlotClientConstants.Audio.Audio_ReelRolling);
+        PlayAudio(Constants.Audio.Audio_ReelRolling);
         for (int i = 0; i < tigerResp.pos.Count; ++i)
         {
             int pos = tigerResp.pos[i];
             string name = "reel" + (i + 1).ToString();
-            SlotClientReel reel = GameObject.Find(name).GetComponent<SlotClientReel>();
+            SlotReel reel = GameObject.Find(name).GetComponent<SlotReel>();
             //Debug.Log("pos" + i.ToString() + ":" + pos.ToString());
 
             if (i == tigerResp.pos.Count - 1)
@@ -167,15 +213,15 @@ public class SlotClientDisplays : MonoBehaviour
         if (null == m_jndWin)
             m_jndWin = new JumpNumberData();
 
-        m_jndWin.From = m_user.Win;
+        m_jndWin.From = m_clerk.Win;
         m_jndWin.To = 0;
         m_jndWin.JumpTimes = 60;
         m_jndWin.Type = JumpNumberData.JumpTypeWin;
 
         if (null == m_jndGold)
             m_jndGold = new JumpNumberData();
-        m_jndGold.From = m_user.Gold;
-        m_jndGold.To = m_user.Gold + m_user.Win;
+        m_jndGold.From = m_clerk.Gold;
+        m_jndGold.To = m_clerk.Gold + m_clerk.Win;
         m_jndGold.JumpTimes = 60;
         m_jndGold.Type = JumpNumberData.JumpTypeGold;
 
@@ -184,9 +230,9 @@ public class SlotClientDisplays : MonoBehaviour
     }
     public IEnumerator JumpWinNumber(JumpNumberData data)
     {
-        int step = 1;
+        long step = 1;
         bool increase = true;
-        int total = 0;
+        long total = 0;
         if (data.From > data.To)
         {
             increase = false;
@@ -219,9 +265,9 @@ public class SlotClientDisplays : MonoBehaviour
                 data.Result -= step;
 
             if (data.Type == JumpNumberData.JumpTypeWin)
-                m_user.Win = data.Result;
+                m_clerk.Win = data.Result;
             else if (data.Type == JumpNumberData.JumpTypeGold)
-                m_user.Gold = data.Result;
+                m_clerk.Gold = data.Result;
 
             yield return 1;
         }
@@ -229,12 +275,12 @@ public class SlotClientDisplays : MonoBehaviour
         data.Result = data.To;
         if (data.Type == JumpNumberData.JumpTypeWin)
         {
-            m_user.Win = data.Result;
+            m_clerk.Win = data.Result;
         }
         else if (data.Type == JumpNumberData.JumpTypeGold)
         {
-            m_user.Gold = data.Result;
-            m_user.Spinning = false;
+            m_clerk.Gold = data.Result;
+            m_clerk.Spinning = false;
 
             // 隐藏金币
             GameObject coin = GameObject.Find("Coin");
@@ -246,27 +292,27 @@ public class SlotClientDisplays : MonoBehaviour
         StopCoroutine(JumpWinNumber(data));
     }
 
-    public void PlayAudio(SlotClientConstants.Audio aud)
+    public void PlayAudio(Constants.Audio aud)
     {
-        if (aud >= SlotClientConstants.Audio.Audio_Max)
+        if (aud >= Constants.Audio.Audio_Max)
         {
             Debug.Log("Ivalid audio enum");
             return;
         }
 
-        string audStr = SlotClientConstants.Audio_Strings[(int)aud];
+        string audStr = Constants.Audio_Strings[(int)aud];
         AudioSource aSource = transform.Find(audStr).GetComponent<AudioSource>();
         aSource.Play();
     }
-    public void StopAudio(SlotClientConstants.Audio aud)
+    public void StopAudio(Constants.Audio aud)
     {
-        if (aud >= SlotClientConstants.Audio.Audio_Max)
+        if (aud >= Constants.Audio.Audio_Max)
         {
             Debug.Log("Ivalid audio enum");
             return;
         }
 
-        string audStr = SlotClientConstants.Audio_Strings[(int)aud];
+        string audStr = Constants.Audio_Strings[(int)aud];
         AudioSource aSource = transform.Find(audStr).GetComponent<AudioSource>();
         aSource.Stop();
     }

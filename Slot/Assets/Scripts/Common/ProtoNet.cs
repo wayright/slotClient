@@ -1,12 +1,14 @@
-﻿// 客户端网络操作封装
+﻿// Proto客户端网络操作封装
+// 但是不涉及具体的数据
 #define U3D
 
 using System.Collections;
 using System.Collections.Generic;
 using ProtoBuf;
-using Login;
-using User;
-using Tiger.Proto;
+//using Login.Proto;
+//using User;
+//using Dog.Proto;
+//using Tiger.Proto;
 using System.IO;
 using System.Text;
 using System;
@@ -25,9 +27,9 @@ public class ProtoPacket
 {
     public int cmdId { get; set; } // 命令号
     public int msgId { get; set; } // 消息号
-    public object proto { get; set; } // proto
+    public object proto { get; set; } // 
 }
-public class SlotClientNet
+public class ProtoNet
 {
     /// <summary>  
     /// 输出日志
@@ -42,13 +44,71 @@ public class SlotClientNet
 #endif
     }
 
-    private static string m_ip = "127.0.0.1";
-    private static int m_port = 5690;
-    private static Socket m_socket;
-    private static bool m_running = true; // 是否正在运行
-    private static ConcurrentQueue<ProtoPacket> m_recvQueue { get; set; } // 接受数据队列
-    private static ConcurrentQueue<ProtoPacket> m_sendQueue { get; set; } // 发送数据队列
-    private static Task m_tkRecvMessageFromServer, m_tkSendMessageToServer;// 任务
+    private string m_ip = "127.0.0.1";
+    private int m_port = 5690;
+    private Socket m_socket;
+    private bool m_running = true; // 是否正在运行
+    private ConcurrentQueue<ProtoPacket> m_recvQueue { get; set; } // 接受数据队列
+    private ConcurrentQueue<ProtoPacket> m_sendQueue { get; set; } // 发送数据队列
+    private Task m_tkRecvMessageFromServer, m_tkSendMessageToServer;// 任务
+    private Dictionary<int, Type> m_types = new Dictionary<int,Type>(); // 序列化支持的类型
+    private string m_name; // 当前Net的名称
+    private float m_rcElapse = 0; // 重连间隔
+
+    public string Name
+    {
+        get { return m_name; }
+        set { m_name = value; }
+    }
+
+    /// <summary>  
+    /// 添加支持的序列化类型
+    /// </summary>  
+    /// <param name="ipStr">IP</param>  
+    /// <param name="port">端口</param> 
+    public bool Add(int cmdId, Type type)
+    {
+        if (m_types.ContainsKey(cmdId))
+            return false;
+
+        m_types[cmdId] = type;
+        return true;
+    }
+
+    /// <summary>  
+    /// 外部调用的重连
+    /// <param name="elapse">几秒后执行</param>  
+    /// </summary>  
+    public bool CheckReconnect(float elapse = 0)
+    {
+        if (elapse > 0)
+        {
+            m_rcElapse = elapse;
+            return false;
+        }
+
+        if (m_rcElapse > 0)
+        {
+            m_rcElapse -= Time.deltaTime;
+            if (m_rcElapse < 0)
+            {
+                return Init(m_ip, m_port);
+            }
+        }
+
+        return false;
+    }
+
+    void AddReconnect()
+    {
+        if (m_rcElapse > 0)
+            return;
+
+        ProtoPacket reconnectPacket = new ProtoPacket();
+        reconnectPacket.cmdId = Constants.Client_Reconnect;
+        reconnectPacket.msgId = 1; // 外部重连
+        m_recvQueue.Enqueue(reconnectPacket);
+    }
 
     /// <summary>  
     /// 初始化socket并连接
@@ -57,13 +117,24 @@ public class SlotClientNet
     /// <param name="port">端口</param>  
     public bool Init(string ipStr, int port)
     {
+        m_running = true;
         m_ip = ipStr;
         m_port = port;
 
         m_recvQueue = new ConcurrentQueue<ProtoPacket>();
         m_sendQueue = new ConcurrentQueue<ProtoPacket>();
 
-        return ConnectServer();
+        if (!ConnectServer())
+        {
+            // 重连展示
+            AddReconnect();
+
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
     /// <summary>  
     ///连接服务器  
@@ -77,6 +148,11 @@ public class SlotClientNet
                 ProtocolType.Tcp);
 
             m_socket.Connect(IPAddress.Parse(m_ip), m_port);
+            if (!m_socket.Connected)
+            {
+                Debug.Log("Failed to socket connect.");
+            }
+
             m_tkRecvMessageFromServer = Task.Factory.StartNew(() =>
             {
                 ReceiveMessage();
@@ -250,6 +326,7 @@ public class SlotClientNet
     /// </summary>  
     private void SendMessage()
     {
+        Debug.Log("SendMessage enter");
         try
         {
             while (m_running)
@@ -264,6 +341,14 @@ public class SlotClientNet
 
                     if (buf != null)
                     {
+                        if (!SendMessageSync(buf))
+                        {
+                            // 退出重连
+                            AddReconnect();
+
+                            break;
+                        }
+                        /*
                         bool success = false;
                         while (true)
                         {
@@ -274,7 +359,8 @@ public class SlotClientNet
                                 if (!m_socket.Connected)
                                 {
                                     ProtoPacket reconnectPacket = new ProtoPacket();
-                                    reconnectPacket.cmdId = SlotClientConstants.Client_Reconnect; // reconnect
+                                    reconnectPacket.cmdId = Constants.Client_Reconnect;
+                                    reconnectPacket.msgId = 0;
 
                                     m_recvQueue.Enqueue(reconnectPacket);
                                     // 一直重连直到成功
@@ -286,7 +372,7 @@ public class SlotClientNet
                             {
                                 break;
                             }
-                        }
+                        }*/
                     }
                 }
                 else
@@ -300,6 +386,7 @@ public class SlotClientNet
         catch(Exception e)
         {
             WriteLog("SendMessage Error:" + e.Message);
+            AddReconnect();
         }
     }
 
@@ -308,6 +395,8 @@ public class SlotClientNet
     /// </summary>  
     private void ReceiveMessage()
     {
+        Debug.Log("ReceiveMessage enter");
+        // Sleep 测试接收短线！！！
         try
         {
             while (m_running)
@@ -383,6 +472,7 @@ public class SlotClientNet
         catch (System.Exception e)
         {
             WriteLog("ReceiveMessage Error:" + e.Message);
+            AddReconnect();
         }
     }
 
@@ -395,11 +485,6 @@ public class SlotClientNet
     {
         try
         {
-            // 二进制转为Proto
-            //byte[] bytes = new byte[4];
-            //Array.Copy(Head, 0, bytes, 0, 4);
-            //int msgLength = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(bytes, 0));
-
             byte[] cmd = new byte[4];
             Array.Copy(Head, 4, cmd, 0, 4);
             int cmdId = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(cmd, 0));
@@ -412,6 +497,26 @@ public class SlotClientNet
             packet.cmdId = cmdId;
             packet.msgId = msgId;
 
+            if (!m_types.ContainsKey(cmdId))
+            {
+                Debug.Log("Not supported cmdId:" + cmdId + " in ProtoNet:" + m_name);
+            }
+            else
+            {
+                MemoryStream ms = new MemoryStream(Body, 0, Body.Length);
+                Type type = m_types[cmdId];
+                object obj = new PBMessageSerializer().Deserialize(ms, null, type);
+                if (obj == null)
+                {
+                    Debug.Log("Deserialize error for cmdId:" + cmdId + " in ProtoNet:" + m_name);
+                }
+                else
+                {
+                    packet.proto = obj;
+                    m_recvQueue.Enqueue(packet);
+                }
+            }
+            /*
             switch (cmdId)
             {
                 case SlotClientConstants.Server_UserInfo:
@@ -440,6 +545,32 @@ public class SlotClientNet
                         }
                     }
                     break;
+                case SlotClientConstants.Server_LoginResp:
+                    {
+                        MemoryStream ms = new MemoryStream(Body, 0, Body.Length);
+                        LoginResp loginResp
+                            = new PBMessageSerializer().Deserialize(ms, null, typeof(LoginResp)) as LoginResp;
+
+                        if (loginResp != null)
+                        {
+                            packet.proto = loginResp;
+                            m_recvQueue.Enqueue(packet);
+                        }
+                    }
+                    break;
+                case SlotClientConstants.Server_RedirectResp:
+                    {
+                        MemoryStream ms = new MemoryStream(Body, 0, Body.Length);
+                        RedirectResp rdResp
+                            = new PBMessageSerializer().Deserialize(ms, null, typeof(RedirectResp)) as RedirectResp;
+
+                        if (rdResp != null)
+                        {
+                            packet.proto = rdResp;
+                            m_recvQueue.Enqueue(packet);
+                        }
+                    }
+                    break;
                 case SlotClientConstants.Server_Error:
                     {
 
@@ -448,7 +579,7 @@ public class SlotClientNet
                 default:
                     WriteLog("Unknown cmd");
                     break;
-            }
+            }*/
         }
         catch(Exception e)
         {

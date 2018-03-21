@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SlotClientReel : MonoBehaviour
+public class SlotReel : MonoBehaviour
 {
     private static System.Random rdSpped = new System.Random();
     private static System.Random rdCheer = new System.Random();
@@ -25,7 +25,7 @@ public class SlotClientReel : MonoBehaviour
     private int[] m_posYArray = new int[6];
     private bool m_return = false;
     private List<Tiger.Proto.TigerBonus> m_bonus = null; // 奖励，最后一个才有
-    private SlotClientUser m_user = null;
+    private SlotClerk m_clerk = null;
   
 	// Use this for initialization
 	void Start () {
@@ -42,7 +42,7 @@ public class SlotClientReel : MonoBehaviour
         m_posYArray[4] = StartPositionY + ItemHeight * 2;
         m_posYArray[5] = StartPositionY + ItemHeight * 3;
 
-        m_user = GameObject.Find("SlotClientUser").GetComponent<SlotClientUser>();
+        m_clerk = GameObject.Find("SlotClerk").GetComponent<SlotClerk>();
 	}
     public void Spin(int item, List<Tiger.Proto.TigerBonus> bonus)
     {
@@ -70,7 +70,7 @@ public class SlotClientReel : MonoBehaviour
         {
             string reelName = "reel" + i.ToString();
             GameObject gameObj = GameObject.Find(reelName);
-            SlotClientReel curReel = gameObj.GetComponent<SlotClientReel>();
+            SlotReel curReel = gameObj.GetComponent<SlotReel>();
             if (dictPos.ContainsKey(curReel.m_item))
             {
                 dictPos[curReel.m_item]++;
@@ -115,7 +115,7 @@ public class SlotClientReel : MonoBehaviour
         {
             string reelName = "reel" + i.ToString();
             GameObject gameObj = GameObject.Find(reelName);
-            SlotClientReel curReel = gameObj.GetComponent<SlotClientReel>();
+            SlotReel curReel = gameObj.GetComponent<SlotReel>();
             if (curReel.m_item == m_bonusItem)
             {
                 Transform tfPanel = curReel.transform.Find("GridLayoutPanel");
@@ -152,7 +152,7 @@ public class SlotClientReel : MonoBehaviour
         {
             string reelName = "reel" + i.ToString();
             GameObject gameObj = GameObject.Find(reelName);
-            SlotClientReel curReel = gameObj.GetComponent<SlotClientReel>();
+            SlotReel curReel = gameObj.GetComponent<SlotReel>();
             if (curReel.m_item == m_bonusItem)
             {
                 Transform tfPanel = curReel.transform.Find("GridLayoutPanel");
@@ -225,13 +225,13 @@ public class SlotClientReel : MonoBehaviour
             m_bufferTimer -= Time.deltaTime;
             if (m_bufferTimer < 0)
             {
-                m_user.Displays.StopAudio(SlotClientConstants.Audio.Audio_ReelRolling);
-                m_user.Displays.StopAudio(SlotClientConstants.Audio.Audio_ReelStop);
+                m_clerk.Displays.StopAudio(Constants.Audio.Audio_ReelRolling);
+                m_clerk.Displays.StopAudio(Constants.Audio.Audio_ReelStop);
 
                 if (m_bonus.Count == 0)
                 {
                     // 没有奖励，可以继续摇了
-                    m_user.Spinning = false;
+                    m_clerk.Spinning = false;
                 }
                 else
                 {
@@ -243,11 +243,11 @@ public class SlotClientReel : MonoBehaviour
                         {
                             case 1:// 倍数
                                 {
-                                    m_user.Win = m_user.Bet * bonus.data1;
+                                    m_clerk.Win = m_clerk.Bet * bonus.data1;
                                 }
                                 break;
                             case 2:// 金币
-                                m_user.Win += bonus.data1;
+                                m_clerk.Win += bonus.data1;
                                 break;
                             case 3:
                                 break;
@@ -257,7 +257,7 @@ public class SlotClientReel : MonoBehaviour
                     }
                     m_bonusTimer = 2.0f; // bonus展示
                     int audIdx = rdCheer.Next(2, 5);
-                    m_user.Displays.PlayAudio((SlotClientConstants.Audio)audIdx);
+                    m_clerk.Displays.PlayAudio((Constants.Audio)audIdx);
                 }
             }
         }
@@ -272,14 +272,14 @@ public class SlotClientReel : MonoBehaviour
                 RestoreBonusItems();
                 
                 // 显示跳跃数字
-                m_user.Displays.PlayAudio(SlotClientConstants.Audio.Audio_CoinFly);
-                m_user.Displays.ShowJumpWin();
+                m_clerk.Displays.PlayAudio(Constants.Audio.Audio_CoinFly);
+                m_clerk.Displays.ShowJumpWin();
             }
 
             // 开始飞跃金币
             if (col.a == 0.0f)
             {
-                //m_user.Displays.PlayAudio(SlotClientConstants.Audio.Audio_CoinFly);
+                //m_clerk.Displays.PlayAudio(Constants.Audio.Audio_CoinFly);
                 coinImg.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
             }
 
@@ -293,7 +293,7 @@ public class SlotClientReel : MonoBehaviour
             if (m_curTimer <= 0)
             {
                 // 滚动停止
-                m_user.Displays.PlayAudio(SlotClientConstants.Audio.Audio_ReelStop);
+                m_clerk.Displays.PlayAudio(Constants.Audio.Audio_ReelStop);
 
                 Vector3 pos = m_scrollRect.content.localPosition;
                 pos.y = m_posYArray[m_item];

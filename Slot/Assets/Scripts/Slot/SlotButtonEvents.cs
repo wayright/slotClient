@@ -4,18 +4,18 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI; 
 
-public class SlotClientButtonEvents : MonoBehaviour {
+public class SlotButtonEvents : MonoBehaviour {
     public System.Random rd = new System.Random(); // Test
     private Dictionary<string, int> m_btnIndexDict = new Dictionary<string,int>();
-    private SlotClientUser m_user = null;
+    private SlotClerk m_clerk = null;
     private int m_spinCheck = 0; // 检查金币是否有误
 	// Use this for initialization
 	void Start () {
         // 为所有按钮添加点击事件
         // 部分没有点击事件
-        for (int i = 0; i < SlotClientConstants.Btn_Strings.Length;++i )
+        for (int i = 0; i < Constants.Btn_Strings.Length;++i )
         {
-            string btnName = SlotClientConstants.Btn_Strings[i];
+            string btnName = Constants.Btn_Strings[i];
             m_btnIndexDict.Add(btnName, i);
             GameObject btnObj = GameObject.Find(btnName);
             Button btn = btnObj.GetComponent<Button>();
@@ -25,7 +25,7 @@ public class SlotClientButtonEvents : MonoBehaviour {
             });
         }
 
-        m_user = GameObject.Find("SlotClientUser").GetComponent<SlotClientUser>();
+        m_clerk = GameObject.Find("SlotClerk").GetComponent<SlotClerk>();
 	}
 
     public void OnClick(GameObject sender)
@@ -39,24 +39,24 @@ public class SlotClientButtonEvents : MonoBehaviour {
 
         Debug.Log("You click button:" + sender.name);
         
-        switch ((SlotClientConstants.Btn)btnIndex)
+        switch ((Constants.Btn)btnIndex)
         {
-            case SlotClientConstants.Btn.Btn_Spin:
+            case Constants.Btn.Btn_Spin:
                 OnButtonSpin();                
                 break;
-            case SlotClientConstants.Btn.Btn_LineMinus:
+            case Constants.Btn.Btn_LineMinus:
                 break;
-            case SlotClientConstants.Btn.Btn_LineAdd:
+            case Constants.Btn.Btn_LineAdd:
                 break;
-            case SlotClientConstants.Btn.Btn_BetAdd:
+            case Constants.Btn.Btn_BetAdd:
                 OnButtonBetAdd();
                 break;
-            case SlotClientConstants.Btn.Btn_BetMinus:
+            case Constants.Btn.Btn_BetMinus:
                 OnButtonBetMinus();
                 break;
-            case SlotClientConstants.Btn.Btn_AutoSpin:
-                m_user.AutoSpin = !m_user.AutoSpin;
-                m_user.Displays.PlayAudio(SlotClientConstants.Audio.Audio_Spin);
+            case Constants.Btn.Btn_AutoSpin:
+                m_clerk.AutoSpin = !m_clerk.AutoSpin;
+                m_clerk.Displays.PlayAudio(Constants.Audio.Audio_Spin);
                 break;
             default:
                 break;
@@ -77,14 +77,14 @@ public class SlotClientButtonEvents : MonoBehaviour {
     
 	// Update is called once per frame
 	void Update () {
-        if (m_user.AutoSpin && !m_user.Spinning && m_user.Login)
+        if (m_clerk.AutoSpin && !m_clerk.Spinning && m_clerk.Login)
         {
             if (m_spinCheck > 0 && m_spinCheck % 10 == 0)
             {
                 // 重新登录检查金币是否准确
                 m_spinCheck = 0;
-                m_user.Login = false;
-                m_user.Requests.ReqQuickLogin();
+                //m_clerk.Login = false;
+                //m_clerk.Requests.ReqQuickLogin();
             }
             else
             {
@@ -94,34 +94,34 @@ public class SlotClientButtonEvents : MonoBehaviour {
 	}
     void OnButtonSpin()
     {
-        m_user.Displays.PlayAudio(SlotClientConstants.Audio.Audio_Spin);
+        m_clerk.Displays.PlayAudio(Constants.Audio.Audio_Spin);
         
-        if (m_user.Spinning)
+        if (m_clerk.Spinning)
         {
             Debug.Log("I'm spinning!");
             return;
         }
         else
         {
-            m_user.SpinCount++;
-            m_spinCheck = m_user.SpinCount;
-            m_user.Spinning = true;
+            m_clerk.SpinCount++;
+            m_spinCheck = m_clerk.SpinCount;
+            m_clerk.Spinning = true;
         }
 
-        if (m_user.Win > 0) // 有奖励没有领取
+        if (m_clerk.Win > 0) // 有奖励没有领取
         {
             Debug.Log("Error!"); // 当前是自动领取
-            m_user.Displays.ShowJumpWin(); // 点击领取
+            m_clerk.Displays.ShowJumpWin(); // 点击领取
         }
         else
         {
-            m_user.Requests.ReqSpin();
+            m_clerk.Requests.ReqSpin();
         }
     }
     void OnButtonBetAdd()
     {
-        m_user.Displays.PlayAudio(SlotClientConstants.Audio.Audio_PlusMinus);
-        int bet = m_user.Bet;
+        m_clerk.Displays.PlayAudio(Constants.Audio.Audio_PlusMinus);
+        int bet = m_clerk.Bet;
         if (bet == 30)
         {
             bet = 10;
@@ -130,12 +130,12 @@ public class SlotClientButtonEvents : MonoBehaviour {
         {
             bet += 10;
         }
-        m_user.Bet = bet;
+        m_clerk.Bet = bet;
     }
     void OnButtonBetMinus()
     {
-        m_user.Displays.PlayAudio(SlotClientConstants.Audio.Audio_PlusMinus);
-        int bet = m_user.Bet;
+        m_clerk.Displays.PlayAudio(Constants.Audio.Audio_PlusMinus);
+        int bet = m_clerk.Bet;
         if (bet == 10)
         {
             bet = 30;
@@ -144,6 +144,6 @@ public class SlotClientButtonEvents : MonoBehaviour {
         {
             bet -= 10;
         }
-        m_user.Bet = bet;
+        m_clerk.Bet = bet;
     }
 }
