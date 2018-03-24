@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Google.Protobuf.Collections;
 
 public class SlotReel : MonoBehaviour
 {
@@ -23,8 +24,8 @@ public class SlotReel : MonoBehaviour
     public const int ItemHeight = 235;
     public static string[] ItemStringArray = { "None", "东", "南", "西", "北", "中" };
     private int[] m_posYArray = new int[6];
-    private bool m_return = false;
-    private List<Tiger.Proto.TigerBonus> m_bonus = null; // 奖励，最后一个才有
+    //private bool m_return = false;
+    private RepeatedField<Tiger.Proto.TigerBonus> m_bonus = null; // 奖励，最后一个才有
     private SlotClerk m_clerk = null;
   
 	// Use this for initialization
@@ -44,7 +45,7 @@ public class SlotReel : MonoBehaviour
 
         m_clerk = GameObject.Find("SlotClerk").GetComponent<SlotClerk>();
 	}
-    public void Spin(int item, List<Tiger.Proto.TigerBonus> bonus)
+    public void Spin(int item, RepeatedField<Tiger.Proto.TigerBonus> bonus)
     {
         m_speed = rdSpped.Next(2000, 3000);
         m_item = item > 5 ? item % 5 : item;
@@ -191,7 +192,7 @@ public class SlotReel : MonoBehaviour
         }
         else
         {
-            m_return = true;
+           // m_return = true;
         }
     }
 	
@@ -239,15 +240,15 @@ public class SlotReel : MonoBehaviour
                     {
                         Tiger.Proto.TigerBonus bonus = m_bonus[i];
                         // 回调Display，更新金币数 
-                        switch (bonus.type)
+                        switch (bonus.Type)
                         {
                             case 1:// 倍数
                                 {
-                                    m_clerk.Win = m_clerk.Bet * bonus.data1;
+                                    m_clerk.Win = m_clerk.Bet * bonus.Data1;
                                 }
                                 break;
                             case 2:// 金币
-                                m_clerk.Win += bonus.data1;
+                                m_clerk.Win += bonus.Data1;
                                 break;
                             case 3:
                                 break;

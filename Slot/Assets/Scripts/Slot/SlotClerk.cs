@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using Login.Proto;
 using Tiger.Proto;
-using User;
 
 public class SlotClerk : MonoBehaviour {
 
@@ -32,10 +31,12 @@ public class SlotClerk : MonoBehaviour {
         m_tigerNo = 888;
         m_seqNo = 666;
         m_gold = 0;
+        
         m_net = new ProtoNet();
+
         // 增加前台支持的网络包类型
-        m_net.Add(Constants.Server_UserInfo, typeof(UserInfo));
-        m_net.Add(Constants.Server_TigerResp, typeof(TigerResp));
+        m_net.Add(Constants.Server_UserInfo, TigerUserInfo.Parser);
+        m_net.Add(Constants.Server_TigerResp, TigerResp.Parser);
         m_net.Add(Constants.Client_Reconnect, null);
         m_net.Add(Constants.Server_Error, null);
         m_net.Name = "SlotClerk";
@@ -73,46 +74,31 @@ public class SlotClerk : MonoBehaviour {
         // 发送快速登录
         m_requests.QuickLogin();
 	}
-    public void CallBack(int index, object obj)
-    {
-        //switch (index)
-        //{
-        //    case 1:
-        //        {
-        //            m_requests.ReqRedirect(2);
-        //        }
-        //        break;
-        //    case 2:
-        //        {                    
-        //            RedirectResp rdResp = (RedirectResp)obj;
-        //            Debug.Log(rdResp.domain);
-        //            m_client.Close();
-        //            if (false == m_client.Init(rdResp.domain, rdResp.port))
-        //            {
-        //                Debug.Log("Client init failed!");
-        //            }
-        //            else
-        //            {
-        //                Debug.Log("Client reinit succeeded!" + m_id + "" + m_key);
-        //                m_requests.ReqQuickLogin();
-        //            }
-        //        }
-        //        break;
-        //    default:
-        //        break;
-        //}
-    }
     void OnApplicationQuit()
     {
         m_net.Close();
     }
+
+    void CheckLogin()
+    {
+        if (!m_login)
+            m_requests.QuickLogin();
+    }
 	
 	// Update is called once per frame
 	void Update () {
+        if (!m_net.IsRunning())
+            return;
+
+        if (m_net.CheckReconnect())
+        {
+            CheckLogin();
+        }
+
         ProtoPacket packet = new ProtoPacket();
         if (m_net.RecvTryDequeue(ref packet))
         {
-            m_displays.Execute(packet);
+           m_displays.Execute(packet);
         }
 	}
 

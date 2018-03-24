@@ -13,25 +13,24 @@ using UnityEngine.SceneManagement;
 public class Reception : MonoBehaviour
 {
     // 需要客户的基本信息
-    private int m_gold = 0; // 总金额
-    private int m_key = 0; // Key
+    //private int m_gold = 0; // 总金额
+    //private int m_key = 0; // Key
     private bool m_login; // 是否登录
     private ProtoNet m_net; // 网络处理
 
-    public Dictionary<int, int> CallbackDict = new Dictionary<int,int>();
-
-	// Use this for initialization
+    // Use this for initialization
 	void Start () {
-        m_key = 123456;
-        m_gold = 0;
+        //m_key = 123456;
+        //m_gold = 0;
         m_net = new ProtoNet();
         m_login = false;
 
         // 初始化ProtoNet
         m_net = new ProtoNet();
+
         // 增加前台支持的网络包类型
-        m_net.Add(Constants.Server_LoginResp, typeof(LoginResp));
-        m_net.Add(Constants.Server_RedirectResp, typeof(RedirectResp));
+        m_net.Add(Constants.Server_LoginResp, LoginResp.Parser);
+        m_net.Add(Constants.Server_RedirectResp, RedirectResp.Parser);
         m_net.Add(Constants.Client_Reconnect, null);
         m_net.Add(Constants.Server_Error, null);
         m_net.Name = "Reception";
@@ -58,22 +57,32 @@ public class Reception : MonoBehaviour
     {
         if (sender.name == "slot")
         {
-            Debug.Log("Reception redirect for slot");
-            Redirect();
+            // 检查是否登录
+            if (m_login)
+            {
+                Redirect();
+            }
+            else
+            {
+                WorkDone callBack = new WorkDone(Redirect);
+                Login(callBack);
+            }
         }
     }
 
-    void Login()
+    void Login(WorkDone callBack = null)
     {
         LoginReq loginReq = new LoginReq();
-        loginReq.version = 1;
-        loginReq.args.Add("TEST");
-        loginReq.args.Add("1");
-        loginReq.args.Add("wdz");
+        loginReq.Version = 1;
+        loginReq.Args.Add("TEST");
+        loginReq.Args.Add("1");
+        loginReq.Args.Add("wdz");
 
-        m_net.SendEnqueue(Constants.Client_LoginReq, 0, loginReq);
+        m_net.SendEnqueue(Constants.Client_LoginReq,
+            0, 
+            loginReq,
+            callBack);
     }
-
     void CheckLogin()
     {
         if (!m_login)
@@ -84,13 +93,11 @@ public class Reception : MonoBehaviour
 
     void Redirect()
     {
-        CheckLogin();
-
         RedirectReq rdReq = new RedirectReq();
-        rdReq.user_id = Lobby.getInstance().UId;
-        rdReq.svc = 100; // 老虎机
-        rdReq.version = 1;
-        rdReq.sub_svc = 0;
+        rdReq.UserId = Lobby.getInstance().UId;
+        rdReq.Svc = 100; // 老虎机
+        rdReq.Version = 1;
+        rdReq.SubSvc = 0;
 
         m_net.SendEnqueue(Constants.Client_RedirectReq, 0, rdReq);
     }
@@ -98,12 +105,22 @@ public class Reception : MonoBehaviour
     {
         m_net.Close();
     }
-	
+
 	// Update is called once per frame
 	void Update () {
+        if (!m_net.IsRunning())
+        {
+            // 主动结束了
+            return;
+        }
+
         if (m_net.CheckReconnect())
         {
             CheckLogin();
+
+            GameObject canvas = GameObject.Find("Canvas");
+            GameObject goReconnectDialog = canvas.transform.Find("DialogReconnect").gameObject; 
+            goReconnectDialog.SetActive(false);
         }
 
         ProtoPacket packet = new ProtoPacket();
@@ -115,19 +132,26 @@ public class Reception : MonoBehaviour
                 case Constants.Server_LoginResp:
                     {
                         LoginResp loginResp = (LoginResp)packet.proto;
-                        Lobby.getInstance().UId = loginResp.user_id;
+                        Lobby.getInstance().UId = loginResp.UserId;
                         m_login = true;
+
+                        if (packet.callback != null)
+                        {
+                            Debug.Log("Call back here");
+                            packet.callback();
+                        }
                     }
                     break;
                 case Constants.Server_RedirectResp:
                     {
                         RedirectResp rdResp = (RedirectResp)packet.proto;
                         Lobby lobby = Lobby.getInstance();
-                        lobby.Domain = rdResp.domain;
-                        lobby.Port = rdResp.port;
-                        lobby.Key = rdResp.key;
+                        lobby.Domain = rdResp.Domain;
+                        lobby.Port = rdResp.Port;
+                        lobby.Key = rdResp.Key;
 
                         // 切换到游戏场景中
+                        m_net.Close(false);
                         Debug.Log("Reception enter slot scene");
                         SceneManager.LoadScene("slot");
                     }
@@ -140,6 +164,9 @@ public class Reception : MonoBehaviour
                         {
                             // 3s后Display中重连
                             m_net.CheckReconnect(3);
+                            GameObject canvas = GameObject.Find("Canvas");
+                            GameObject goReconnectDialog = canvas.transform.Find("DialogReconnect").gameObject;
+                            goReconnectDialog.SetActive(true);
                         }
                     }
                     break;

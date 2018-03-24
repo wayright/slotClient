@@ -3,9 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI; 
-using ProtoBuf;
 using Login.Proto;
-using User;
 using Common;
 using Tiger.Proto;
 using Dog.Proto;
@@ -40,8 +38,8 @@ public class SlotRequests{
             Debug.Log("Clerk is null");
 
         QuickLoginInfo quickLoginInfo = new QuickLoginInfo();
-        quickLoginInfo.user_id = m_clerk.UId;
-        quickLoginInfo.key = m_clerk.Key;
+        quickLoginInfo.UserId = m_clerk.UId;
+        quickLoginInfo.Key = m_clerk.Key;
 
         m_net.SendEnqueue(Constants.Client_QuickLoginInfo, 0, quickLoginInfo);
     }
@@ -54,11 +52,11 @@ public class SlotRequests{
         }
 
         TigerReq tigerReq = new TigerReq();
-        tigerReq.bet_gold = m_clerk.Bet; // only 10, 20, 30
-        tigerReq.seq_no = m_clerk.SeqNo;
-        tigerReq.tiger_no = m_clerk.TigerNo;
+        tigerReq.BetGold = m_clerk.Bet; // only 10, 20, 30
+        tigerReq.SeqNo = m_clerk.SeqNo;
+        tigerReq.TigerNo = m_clerk.TigerNo;
         for (int i = 0; i < m_clerk.Lines; ++i)
-            tigerReq.lines.Add(i);
+            tigerReq.Lines.Add(i);
 
         m_net.SendEnqueue(Constants.Client_TigerReq, 0, tigerReq);        
     }

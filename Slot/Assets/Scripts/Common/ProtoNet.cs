@@ -4,11 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using ProtoBuf;
-//using Login.Proto;
-//using User;
-//using Dog.Proto;
-//using Tiger.Proto;
+using Google.Protobuf;
 using System.IO;
 using System.Text;
 using System;
@@ -23,11 +19,13 @@ using System.Windows.Forms;
 #else
 using UnityEngine;
 #endif
+public delegate void WorkDone();
 public class ProtoPacket
 {
     public int cmdId { get; set; } // 命令号
     public int msgId { get; set; } // 消息号
-    public object proto { get; set; } // 
+    public object proto { get; set; } // proto buf
+    public WorkDone callback { get; set; } // 回调函数
 }
 public class ProtoNet
 {
@@ -51,9 +49,10 @@ public class ProtoNet
     private ConcurrentQueue<ProtoPacket> m_recvQueue { get; set; } // 接受数据队列
     private ConcurrentQueue<ProtoPacket> m_sendQueue { get; set; } // 发送数据队列
     private Task m_tkRecvMessageFromServer, m_tkSendMessageToServer;// 任务
-    private Dictionary<int, Type> m_types = new Dictionary<int,Type>(); // 序列化支持的类型
+    private Dictionary<int, MessageParser> m_types = new Dictionary<int, MessageParser>(); // 序列化支持的类型
     private string m_name; // 当前Net的名称
     private float m_rcElapse = 0; // 重连间隔
+    private Dictionary<int, WorkDone> m_callbackDict = new Dictionary<int, WorkDone>(); // 回调函数列表
 
     public string Name
     {
@@ -66,13 +65,18 @@ public class ProtoNet
     /// </summary>  
     /// <param name="ipStr">IP</param>  
     /// <param name="port">端口</param> 
-    public bool Add(int cmdId, Type type)
+    public bool Add(int cmdId, MessageParser type)
     {
         if (m_types.ContainsKey(cmdId))
             return false;
 
         m_types[cmdId] = type;
         return true;
+    }
+
+    public bool IsRunning()
+    {
+        return m_running;
     }
 
     /// <summary>  
@@ -147,6 +151,10 @@ public class ProtoNet
                 SocketType.Stream,
                 ProtocolType.Tcp);
 
+            m_socket.SetSocketOption(SocketOptionLevel.Socket,
+                SocketOptionName.SendTimeout,
+                1000);
+
             m_socket.Connect(IPAddress.Parse(m_ip), m_port);
             if (!m_socket.Connected)
             {
@@ -185,20 +193,38 @@ public class ProtoNet
     /// <summary>  
     /// 关闭
     /// </summary>
-    public void Close()
+    public void Close(bool closeSocket = true)
     {
         try
         {
+            if (!closeSocket)
+            {
+                // 滞后关闭
+                m_running = false;
+                return;
+            }
+
             // 结束接收线程&发送线程
             m_socket.Close();
             m_running = false;
-            Thread.Sleep(1000);
-
-            if (m_tkRecvMessageFromServer.IsCompleted == true
-                && m_tkSendMessageToServer.IsCompleted == true)
+            int sleepTime = 0;
+            while (true)
             {
-                WriteLog("Tasks end.");
+                Thread.Sleep(5);
+                sleepTime += 5;
+
+                if (m_tkRecvMessageFromServer.IsCompleted == true
+                    && m_tkSendMessageToServer.IsCompleted == true)
+                {
+                    WriteLog("Tasks end.");
+                    break;
+                }
+
+                if (sleepTime > 1000)
+                    break;
             }
+
+            WriteLog("Sleep time:" + sleepTime);
         }
         catch(Exception e)
         {
@@ -231,7 +257,7 @@ public class ProtoNet
     /// <param name="cmdId">命令号</param>
     /// <param name="msgId">消息号</param>
     /// <param name="obj">proto</param>
-    public void SendEnqueue(int cmdId, int msgId, object obj)
+    public void SendEnqueue(int cmdId, int msgId, object obj, WorkDone cb = null)
     {
         ProtoPacket packet = new ProtoPacket();
         packet.cmdId = cmdId;
@@ -239,6 +265,12 @@ public class ProtoNet
         packet.proto = obj;
 
         m_sendQueue.Enqueue(packet);
+
+        // 检查回调函数列表
+        if (cb != null)
+        {
+            m_callbackDict.Add(Constants.Client_LoginReq, cb);
+        }
     }
 
     /// <summary>  
@@ -258,10 +290,12 @@ public class ProtoNet
             byte[] bufCmdId = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(cmdId));
             byte[] bufMsgId = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(msgId));
 
-            using (MemoryStream ms = new MemoryStream())
+            //using (MemoryStream ms = new MemoryStream())
             {
-                new PBMessageSerializer().Serialize(ms, protoObj);
-                byte[] bufProto = ms.ToArray();
+                //new PBMessageSerializer().Serialize(ms, protoObj);
+                //byte[] bufProto = ms.ToArray();
+                IMessage msg = (IMessage)protoObj;
+                byte[] bufProto = msg.ToByteArray();
 
                 // 总长度=消息长度+8
                 int msgLength = 8 + bufProto.Length;
@@ -301,7 +335,7 @@ public class ProtoNet
             {
                 // 获取远程终结点的IP和端口信息  
                 //IPEndPoint ipe = (IPEndPoint)m_socket.RemoteEndPoint;
-                int sentBytes = m_socket.Send(sendBytes, sendBytes.Length, 0);
+                int sentBytes = m_socket.Send(sendBytes, sendBytes.Length, SocketFlags.None);
                 if (sentBytes != sendBytes.Length)
                 {
                     WriteLog("SendMessageSync Error: sentBytes != sendBytes.Length");
@@ -379,6 +413,11 @@ public class ProtoNet
                 {
                     Thread.Sleep(5);
                 }
+            }
+
+            if (m_socket.Connected)
+            {
+                m_socket.Close();
             }
 
             WriteLog("SendMessage thread exit.");
@@ -468,6 +507,10 @@ public class ProtoNet
             }
 
             WriteLog("ReceiveMessage thread exit.");
+            if (m_socket.Connected)
+            {
+                m_socket.Close();
+            }
         }
         catch (System.Exception e)
         {
@@ -497,15 +540,23 @@ public class ProtoNet
             packet.cmdId = cmdId;
             packet.msgId = msgId;
 
+            // 检查回调函数列表
+            if (m_callbackDict.ContainsKey(cmdId))
+            {
+                packet.callback = m_callbackDict[cmdId];
+                m_callbackDict.Remove(cmdId);
+            }
+
             if (!m_types.ContainsKey(cmdId))
             {
                 Debug.Log("Not supported cmdId:" + cmdId + " in ProtoNet:" + m_name);
             }
             else
             {
-                MemoryStream ms = new MemoryStream(Body, 0, Body.Length);
-                Type type = m_types[cmdId];
-                object obj = new PBMessageSerializer().Deserialize(ms, null, type);
+                //MemoryStream ms = new MemoryStream(Body, 0, Body.Length);
+                //Type type = m_types[cmdId];
+                //object obj = new PBMessageSerializer().Deserialize(ms, null, type);
+                object obj = m_types[cmdId].ParseFrom(Body, 0, Body.Length);
                 if (obj == null)
                 {
                     Debug.Log("Deserialize error for cmdId:" + cmdId + " in ProtoNet:" + m_name);

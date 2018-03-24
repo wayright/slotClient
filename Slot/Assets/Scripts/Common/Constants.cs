@@ -4,16 +4,16 @@ using System.Collections.Generic;
 public class Constants{
     //// 常用变量
     // #Lobby
-    public const int Client_QuickLoginInfo = 1000; // 快速登录
-    public const int Client_LoginReq = 1001; // Dog登录
-    public const int Client_RedirectReq = 1003; // Dog重定向
-    public const int Server_UserInfo = 1000;// 用户信息（快速登录返回）
-    public const int Server_LoginResp = 1001; // Dog登录
-    public const int Server_RedirectResp = 1003; // Dog重定向
+    public const int Client_QuickLoginInfo = 10000; // 快速登录
+    public const int Client_LoginReq = 1100; // Dog登录
+    public const int Client_RedirectReq = 301; // Dog重定向
+    public const int Server_UserInfo = 10000;// 用户信息（快速登录返回）
+    public const int Server_LoginResp = 1100; // Dog登录
+    public const int Server_RedirectResp = 301; // Dog重定向
 
     // #Slot
-    public const int Client_TigerReq = 10000;// spin请求
-    public const int Server_TigerResp = 10000;// spin返回
+    public const int Client_TigerReq = 10050;// spin请求
+    public const int Server_TigerResp = 10050;// spin返回
 
     // #Common
     public const int Client_Reconnect = 99999; // 本地重连

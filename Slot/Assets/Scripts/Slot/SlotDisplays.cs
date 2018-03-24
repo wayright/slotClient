@@ -3,11 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using ProtoBuf;
 using Login.Proto;
-using User;
 using Common;
-//using Dog.Proto;
 using Tiger.Proto;
 using System.IO;
 using System.Text;
@@ -100,13 +97,13 @@ public class SlotDisplays : MonoBehaviour
 
     void Update()
     {
-        if (m_dw.Active())
-        {
-            if (!m_dw.Step())
-            {
-                m_clerk.Net.Init("127.0.0.1", 7879);
-            }
-        }
+        //if (m_dw.Active())
+        //{
+        //    if (!m_dw.Step())
+        //    {
+        //        m_clerk.Net.Init("127.0.0.1", 7879);
+        //    }
+        //}
     }
 
     public void Execute(ProtoPacket packet)
@@ -116,7 +113,7 @@ public class SlotDisplays : MonoBehaviour
         {
             case Constants.Server_UserInfo:// QuickLoginInfo返回
                 {
-                    UserInfo usrInfo = (UserInfo)packet.proto;
+                    TigerUserInfo usrInfo = (TigerUserInfo)packet.proto;
                     /*
                     SlotClientNet.WriteLog("Recv proto packet[UserInfo]:\nid=" +
                         usrInfo.user_id + "\ngold=" + usrInfo.gold);
@@ -144,7 +141,7 @@ public class SlotDisplays : MonoBehaviour
                     if (packet.msgId > 0)
                     {
                         // 3s后Display中重连
-                        m_dw.Elapse = 3;
+                        m_clerk.Net.CheckReconnect(3);
                     }
                 }
                 break;
@@ -157,19 +154,13 @@ public class SlotDisplays : MonoBehaviour
                 ProtoNet.WriteLog("Unknown send cmd");
                 break;
         }
-
-        if (m_clerk.CallbackDict.ContainsKey(packet.cmdId))
-        {
-            ProtoNet.WriteLog("Callback:" + packet.cmdId);
-            m_clerk.CallBack(m_clerk.CallbackDict[packet.cmdId], packet.proto);
-        }
     }
     // 更新本地界面和数据，以Update开头
-    void UpdateUserInfo(UserInfo usrInfo)
+    void UpdateUserInfo(TigerUserInfo usrInfo)
     {
         // 刷新数据
-        m_clerk.UId = usrInfo.user_id;
-        if (m_clerk.Gold != 0 && m_clerk.Gold != usrInfo.gold)
+        m_clerk.UId = usrInfo.UserId;
+        if (m_clerk.Gold != 0 && m_clerk.Gold != usrInfo.Gold)
         {
             Debug.Log("Gold cant match!!!");
         }
@@ -177,7 +168,7 @@ public class SlotDisplays : MonoBehaviour
         {
             Debug.Log("Gold can match!!!");
         }
-        m_clerk.Gold = usrInfo.gold;
+        m_clerk.Gold = usrInfo.Gold;
         m_clerk.Login = true;
 
         // 以下代码用于刷新界面
@@ -192,15 +183,15 @@ public class SlotDisplays : MonoBehaviour
 
         // 滚动开始
         PlayAudio(Constants.Audio.Audio_ReelRolling);
-        for (int i = 0; i < tigerResp.pos.Count; ++i)
+        for (int i = 0; i < tigerResp.Pos.Count; ++i)
         {
-            int pos = tigerResp.pos[i];
+            int pos = tigerResp.Pos[i];
             string name = "reel" + (i + 1).ToString();
             SlotReel reel = GameObject.Find(name).GetComponent<SlotReel>();
             //Debug.Log("pos" + i.ToString() + ":" + pos.ToString());
 
-            if (i == tigerResp.pos.Count - 1)
-                reel.Spin(pos + 2, tigerResp.bonus);
+            if (i == tigerResp.Pos.Count - 1)
+                reel.Spin(pos + 2, tigerResp.Bonus);
             else
                 reel.Spin(pos + 2, null);
         }
