@@ -1,0 +1,1 @@
+protoc.exe --csharp_out=./../ProtoCS common.proto dog.proto login.proto tiger.proto 

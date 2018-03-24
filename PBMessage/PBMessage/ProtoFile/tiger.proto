@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package Tiger.Proto;
+
+option java_package = "studio.first.proto.tiger";
+option java_outer_classname = "TigerProto";
+
+message TigerReq {
+	int32 tiger_no = 1;       // 第几台机器
+	int32 seq_no = 2;         // 前端自身序号
+	int64 bet_gold = 3;       // 每个投注金额
+	repeated int32 lines = 4; // 用户选择的payline索引
+}
+
+message TigerBonus {
+	int32 line = 1;          // payline索引
+	int32 pattern = 2;       // 中了哪种牌型
+	int32 type = 3;          // 奖励类型，1=倍数，2=金币，3=免费局
+	int32 data1 = 4;         // 数据1
+	int32 data2 = 5;         // 数据2
+}
+
+message TigerCurrent {
+	int64 gold = 1;         // 当前金币
+	int32 free_spins = 2;   // 当前剩余免费局
+}
+
+message TigerResp {
+	int32 tiger_no = 1;      // 第几台机器
+	int32 seq_no = 2;        // 前端自身序号
+	repeated int32 pos = 3;  // 结果数组，代表每一列摇到的位置
+	repeated TigerBonus bonus = 4;  // 中奖信息
+	TigerCurrent current = 5;       // 当前值
+}
+
+message TigerUserInfo {
+	int64 user_id = 1;  // 玩家id
+	int64 gold = 2;     // 玩家金币数
+}

@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package Common.Proto;
+
+option java_package = "studio.first.proto.base";
+option java_outer_classname = "CommonProto";
+
+message Empty {
+}
+
+message IntValue {
+    int32 value = 1;
+}
+
+message IntArray {
+    repeated int32 data = 1;
+}
+
+message LongValue {
+    int64 value = 1;
+}
+
+message LongArray {
+    repeated int32 data = 1;
+}
+
+message StringValue {
+    string value = 1;
+}
+
+message StringArray {
+    repeated string data = 1;
+}
+
+message StringLongValue {
+    string string_value = 1;
+    int64 long_value = 2;
+}
+
+message Status {
+    int32 code = 1;
+    string desc = 2;
+}
+
+
+

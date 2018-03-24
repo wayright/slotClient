@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+
+package Login.Proto;
+option java_package = "studio.first.proto.base";
+option java_outer_classname = "LoginProto";
+
+message InnerLoginReq {
+    string name = 1; // 登录名称
+    string passwd = 2; // 登录密码
+    string version = 3; // 消息版本
+    string whoami = 4; // 来自何人
+    int32 svc = 5; // 服务编号
+    int32 type = 6;  // 类型
+    string params = 7; // 其它参数
+}
+
+message InnerLoginResp {
+    int32 code = 1; // 状态码
+    int32 unique_id = 2; // 分配的全局唯一id
+    string params = 3; // 其它参数
+}
+
+message InnerQuickLoginInfo {
+    int64 id = 1;
+    int64 key = 2;
+}
+
+message AddrInfo {
+    string domain = 1; // 服务器域名
+    int32 port = 2; // 服务器端口
+    string front_url = 3; // 前端资源地址
+}
+
+message QuickLoginInfo {
+    int64 user_id = 1; // 玩家ID
+    int64 key = 2; // 登录key
+    string svc_name = 3; // 服务名称
+    int32 svc_sub_id = 4; // 子服务ID
+    repeated AddrInfo addrs = 5; // 服务器地址列表
+}
+
+message RedirectReq {
+    int32 version = 1;
+    int32 svc = 2;
+    int32 sub_svc = 3;
+    repeated string args = 4;
+    int64 user_id = 5;
+}
+
+message RedirectResp {
+    int32 version = 1;
+    int32 svc = 2;
+    int32 sub_svc = 3;
+    repeated string args = 4;
+    string domain = 5;
+    int32 port = 6;
+    int64 user_id = 7;
+    int64 key = 8;
+    int32 code = 9;
+}

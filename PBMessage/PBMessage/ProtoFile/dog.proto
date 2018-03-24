@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package Dog.Proto;
+
+option java_package = "studio.first.proto.dog";
+option java_outer_classname = "DogProto";
+
+message LoginReq {
+	int32 version = 1;
+	repeated string args = 2;
+}
+
+message LoginResp {
+	int32 version = 1;
+	int64 user_id = 2;
+}
+
+
