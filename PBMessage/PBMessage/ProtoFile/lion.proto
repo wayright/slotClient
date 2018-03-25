@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package Lion.Proto;
+
+option java_package = "studio.first.proto.lion";
+option java_outer_classname = "LionProto";
+
+message LionUserInfo {
+	int64 user_id = 1;
+	int64 gold = 2;
+	string name = 3;
+	string head_img_url = 4;
+}
+
+
