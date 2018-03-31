@@ -49,6 +49,14 @@ public class Reception : MonoBehaviour
         {
             this.OnClick(btnObj);
         });
+
+        string btnName2 = "poker";
+        GameObject btnObj2 = GameObject.Find(btnName2);
+        Button btn2 = btnObj2.GetComponent<Button>();
+        btn2.onClick.AddListener(delegate()
+        {
+            this.OnClick(btnObj2);
+        });
         // 登录获取UId
         //Login();
 	}
@@ -67,6 +75,10 @@ public class Reception : MonoBehaviour
                 WorkDone callBack = new WorkDone(Redirect);
                 Login(callBack);
             }
+        }
+        else if (sender.name == "poker")
+        {
+            DialogQuit.Show();
         }
     }
 
@@ -92,7 +104,7 @@ public class Reception : MonoBehaviour
     }
 
     void Redirect()
-    {
+    {        
         RedirectReq rdReq = new RedirectReq();
         rdReq.UserId = Lobby.getInstance().UId;
         rdReq.Svc = 100; // 老虎机
@@ -108,6 +120,20 @@ public class Reception : MonoBehaviour
 
 	// Update is called once per frame
 	void Update () {
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            if (DialogQuit.Actived())
+            {
+                Debug.Log("Hide");
+                DialogQuit.Hide();
+            }
+            else
+            {
+                Debug.Log("Show");
+                DialogQuit.Show();
+            }
+        }
+
         if (!m_net.IsRunning())
         {
             // 主动结束了
@@ -118,9 +144,7 @@ public class Reception : MonoBehaviour
         {
             CheckLogin();
 
-            GameObject canvas = GameObject.Find("Canvas");
-            GameObject goReconnectDialog = canvas.transform.Find("DialogReconnect").gameObject; 
-            goReconnectDialog.SetActive(false);
+            DialogReconnect.Hide();
         }
 
         ProtoPacket packet = new ProtoPacket();
@@ -153,7 +177,8 @@ public class Reception : MonoBehaviour
                         // 切换到游戏场景中
                         m_net.Close(false);
                         Debug.Log("Reception enter slot scene");
-                        SceneManager.LoadScene("slot");
+                        Global.NextSceneName = "slot";
+                        SceneManager.LoadScene("loading");
                     }
                     break;
                 case Constants.Client_Reconnect:
@@ -164,9 +189,7 @@ public class Reception : MonoBehaviour
                         {
                             // 3s后Display中重连
                             m_net.CheckReconnect(3);
-                            GameObject canvas = GameObject.Find("Canvas");
-                            GameObject goReconnectDialog = canvas.transform.Find("DialogReconnect").gameObject;
-                            goReconnectDialog.SetActive(true);
+                            DialogReconnect.Show();
                         }
                     }
                     break;

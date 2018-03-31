@@ -87,4 +87,8 @@ public class Constants{
         "CoinFly",
         "PlusMinus"
     };
+
+    // 语言
+    public const string Lang_Eng = "eng"; // 英文
+    public const string Lang_CN = "cn"; // 简体中文
 }

@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI; 
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class SlotButtonEvents : MonoBehaviour {
     public System.Random rd = new System.Random(); // Test
@@ -57,6 +58,12 @@ public class SlotButtonEvents : MonoBehaviour {
             case Constants.Btn.Btn_AutoSpin:
                 m_clerk.AutoSpin = !m_clerk.AutoSpin;
                 m_clerk.Displays.PlayAudio(Constants.Audio.Audio_Spin);
+                break;
+            case Constants.Btn.Btn_Return:
+                m_clerk.Displays.PlayAudio(Constants.Audio.Audio_Spin);
+                m_clerk.Net.Close(false);
+                Debug.Log("Slot enter lobby scene");
+                SceneManager.LoadScene("lobby");
                 break;
             default:
                 break;

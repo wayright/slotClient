@@ -23,6 +23,7 @@ public class SlotClerk : MonoBehaviour {
     private SlotRequests m_requests; // 请求器
     private bool m_spinning = false; // 是否正在摇
     private bool m_autoSpin = false; // 自动摇奖
+    //private int m_escapeTimes = 1; // 退出
     public Dictionary<int, int> CallbackDict = new Dictionary<int,int>();
 
 	// Use this for initialization
@@ -84,9 +85,34 @@ public class SlotClerk : MonoBehaviour {
         if (!m_login)
             m_requests.QuickLogin();
     }
-	
+    //IEnumerator resetTimes()
+    //{
+    //    yield return new WaitForSeconds(1);
+    //    m_escapeTimes = 1;
+    //}
 	// Update is called once per frame
 	void Update () {
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            //这个地方可以写“再按一次退出”的提示
+            if (DialogQuit.Actived())
+            {
+                Debug.Log("Hide");
+                DialogQuit.Hide();
+            }
+            else
+            {
+                Debug.Log("Show");
+                DialogQuit.Show();
+            }
+            //m_escapeTimes++;
+            //StartCoroutine("resetTimes");
+            //if (m_escapeTimes > 1)
+            //{
+            //    Application.Quit();
+            //}
+        }
+
         if (!m_net.IsRunning())
             return;
 

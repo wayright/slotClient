@@ -1,0 +1,2 @@
+﻿Reconnecting=重连中
+Dot=.
