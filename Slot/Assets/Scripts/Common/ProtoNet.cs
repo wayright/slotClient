@@ -205,7 +205,8 @@ public class ProtoNet
             }
 
             // 结束接收线程&发送线程
-            m_socket.Close();
+            m_socket.Shutdown(SocketShutdown.Both);
+            //m_socket.Close(); // Close 在IOS下导致崩溃
             m_running = false;
             int sleepTime = 0;
             while (true)
@@ -223,6 +224,9 @@ public class ProtoNet
                 if (sleepTime > 1000)
                     break;
             }
+
+            //m_socket.Shutdown(SocketShutdown.Both);
+            //m_socket.Close();
 
             WriteLog("Sleep time:" + sleepTime);
         }
@@ -361,6 +365,7 @@ public class ProtoNet
     private void SendMessage()
     {
         Debug.Log("SendMessage enter");
+
         try
         {
             while (m_running)
@@ -414,11 +419,11 @@ public class ProtoNet
                     Thread.Sleep(5);
                 }
             }
-
-            if (m_socket.Connected)
-            {
-                m_socket.Close();
-            }
+            //if (m_socket.Connected)
+            //{
+            //    m_socket.Shutdown(SocketShutdown.Both);
+            //    m_socket.Close();
+            //}
 
             WriteLog("SendMessage thread exit.");
         }
@@ -452,7 +457,7 @@ public class ProtoNet
                     byte[] recvBytes1 = new byte[HeadLength];
                     // 将本次传输已经接收到的字节数置0  
                     int receivedBytes = 0;
-                    // 如果当前需要接收的字节数大于缓存区大小，则按缓存区大小进行接收，相反则按剩余需要接收的字节数进行接收  
+                    // 如果当前需要接收的字节数大于缓存区大小，则按缓存区大小进行接收，相反则按剩余需要接收的字节数进行接收 
                     if (remainHeadLength >= recvBytes1.Length)
                     {
                         receivedBytes = m_socket.Receive(recvBytes1, recvBytes1.Length, 0);
@@ -502,15 +507,16 @@ public class ProtoNet
                     bodyLength -= receivedBytes;
                 }
 
-                //一个消息包接收完毕，解析消息包  
-                UnPack(recvBytesHead, recvBytesBody);
+                    //一个消息包接收完毕，解析消息包  
+                UnPack(recvBytesHead, recvBytesBody);                
             }
 
             WriteLog("ReceiveMessage thread exit.");
-            if (m_socket.Connected)
-            {
-                m_socket.Close();
-            }
+            //if (m_socket.Connected)
+            //{
+            //    m_socket.Shutdown(SocketShutdown.Both);
+            //    m_socket.Close();
+            //}
         }
         catch (System.Exception e)
         {

@@ -271,20 +271,22 @@ public class SlotReel : MonoBehaviour
             {
                 // 确保都回0度
                 RestoreBonusItems();
-                
+
                 // 显示跳跃数字
                 m_clerk.Displays.PlayAudio(Constants.Audio.Audio_CoinFly);
                 m_clerk.Displays.ShowJumpWin();
             }
-
-            // 开始飞跃金币
-            if (col.a == 0.0f)
+            else
             {
-                //m_clerk.Displays.PlayAudio(Constants.Audio.Audio_CoinFly);
-                coinImg.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-            }
+                // 开始飞跃金币
+                if (col.a == 0.0f)
+                {
+                    //m_clerk.Displays.PlayAudio(Constants.Audio.Audio_CoinFly);
+                    coinImg.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+                }
 
-            RotateBonusItems();
+                RotateBonusItems();
+            }
         }
 
         // 检查滚动

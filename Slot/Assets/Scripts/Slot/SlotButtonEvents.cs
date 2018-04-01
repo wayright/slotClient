@@ -61,7 +61,7 @@ public class SlotButtonEvents : MonoBehaviour {
                 break;
             case Constants.Btn.Btn_Return:
                 m_clerk.Displays.PlayAudio(Constants.Audio.Audio_Spin);
-                m_clerk.Net.Close(false);
+                m_clerk.Net.Close();
                 Debug.Log("Slot enter lobby scene");
                 SceneManager.LoadScene("lobby");
                 break;

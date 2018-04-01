@@ -175,7 +175,7 @@ public class Reception : MonoBehaviour
                         lobby.Key = rdResp.Key;
 
                         // 切换到游戏场景中
-                        m_net.Close(false);
+                        m_net.Close();
                         Debug.Log("Reception enter slot scene");
                         Global.NextSceneName = "slot";
                         SceneManager.LoadScene("loading");
