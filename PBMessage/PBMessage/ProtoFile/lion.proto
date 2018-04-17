@@ -10,6 +10,16 @@ message LionUserInfo {
 	int64 gold = 2;
 	string name = 3;
 	string head_img_url = 4;
+	int32 level = 5;
+	string location = 6;
+	int32 praise = 7;
 }
 
+message TigerStat {
+	int64 user_id = 1;
+	int64 total_win = 2;
+	int64 biggest_win = 3;
+	int64 win_spins = 4;
+	int64 total_spins = 5;
+}
 
