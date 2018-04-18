@@ -45,7 +45,7 @@ public class ProtoNet
     private string m_ip = "127.0.0.1";
     private int m_port = 5690;
     private Socket m_socket;
-    private bool m_running = true; // 是否正在运行
+    private bool m_running = false; // 是否正在运行
     private ConcurrentQueue<ProtoPacket> m_recvQueue { get; set; } // 接受数据队列
     private ConcurrentQueue<ProtoPacket> m_sendQueue { get; set; } // 发送数据队列
     private Task m_tkRecvMessageFromServer, m_tkSendMessageToServer;// 任务
@@ -109,7 +109,7 @@ public class ProtoNet
             return;
 
         ProtoPacket reconnectPacket = new ProtoPacket();
-        reconnectPacket.cmdId = Constants.Client_Reconnect;
+        reconnectPacket.cmdId = Constants.Reconnect;
         reconnectPacket.msgId = 1; // 外部重连
         m_recvQueue.Enqueue(reconnectPacket);
     }
@@ -273,7 +273,7 @@ public class ProtoNet
         // 检查回调函数列表
         if (cb != null)
         {
-            m_callbackDict.Add(Constants.Client_LoginReq, cb);
+            m_callbackDict.Add(cmdId, cb);
         }
     }
 
@@ -477,7 +477,7 @@ public class ProtoNet
                 Array.Copy(recvBytesHead, 0, bytes, 0, 4);
                 int bodyLength = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(bytes, 0));
                 bodyLength -= 8;
-                if (bodyLength <= 0)
+                if (bodyLength < 0)
                 {
                     // 错误的长度
                     WriteLog("Receive invalid body length=" + bodyLength);
@@ -507,8 +507,8 @@ public class ProtoNet
                     bodyLength -= receivedBytes;
                 }
 
-                    //一个消息包接收完毕，解析消息包  
-                UnPack(recvBytesHead, recvBytesBody);                
+                //一个消息包接收完毕，解析消息包  
+                UnPack(recvBytesHead, recvBytesBody);
             }
 
             WriteLog("ReceiveMessage thread exit.");

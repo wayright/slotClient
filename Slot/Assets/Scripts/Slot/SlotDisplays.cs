@@ -111,7 +111,7 @@ public class SlotDisplays : MonoBehaviour
         ProtoNet.WriteLog("handle cmd from server:" + packet.cmdId);
         switch (packet.cmdId)
         {
-            case Constants.Server_UserInfo:// QuickLoginInfo返回
+            case Constants.Tiger_QuickLoginInfo:// QuickLoginInfo返回
                 {
                     TigerUserInfo usrInfo = (TigerUserInfo)packet.proto;
                     /*
@@ -121,7 +121,7 @@ public class SlotDisplays : MonoBehaviour
                     UpdateUserInfo(usrInfo);
                 }
                 break;
-            case Constants.Server_TigerResp: // TigerReq返回
+            case Constants.Tiger_Spin:
                 {
                     TigerResp tigerResp = (TigerResp)packet.proto;
                     /*
@@ -135,7 +135,7 @@ public class SlotDisplays : MonoBehaviour
                     UpdateTigerResp(tigerResp);                        
                 }
                 break;           
-            case Constants.Client_Reconnect:
+            case Constants.Reconnect:
                 {
                     ProtoNet.WriteLog("Reconnecting...");
                     if (packet.msgId > 0)
@@ -145,7 +145,7 @@ public class SlotDisplays : MonoBehaviour
                     }
                 }
                 break;
-            case Constants.Server_Error:
+            case Constants.Error:
                 {
                     ProtoNet.WriteLog("Reconnecting...");
                 }
@@ -178,6 +178,29 @@ public class SlotDisplays : MonoBehaviour
 
     void UpdateTigerResp(TigerResp tigerResp)
     {
+        // 结束计时
+        //long elapse = m_clerk.End();
+        m_clerk.SeqNo = 0;
+        ////test
+        //{
+        //    tigerResp.Pos.Clear();
+        //    tigerResp.Pos.Add(4);
+        //    tigerResp.Pos.Add(1);
+        //    tigerResp.Pos.Add(4);
+        //    tigerResp.Pos.Add(4);
+        //    tigerResp.Pos.Add(2);
+
+        //    tigerResp.Bonus.Clear();
+        //    TigerBonus item = new TigerBonus();
+        //    item.Pattern = 2;
+        //    item.Type = 1;
+        //    item.Data1 = 2;
+
+        //    tigerResp.Bonus.Add(item);
+        //    tigerResp.Current.Gold = 2004810;
+
+        //}
+
         // 本地减金币先
         m_clerk.Gold -= m_clerk.Bet * m_clerk.Lines;
 
@@ -191,9 +214,17 @@ public class SlotDisplays : MonoBehaviour
             //Debug.Log("pos" + i.ToString() + ":" + pos.ToString());
 
             if (i == tigerResp.Pos.Count - 1)
+            {
+                if (null == tigerResp.Bonus)
+                {
+                    DialogBase.Show("null == tigerResp.Bonus");
+                }
                 reel.Spin(pos + 2, tigerResp.Bonus);
+            }
             else
+            {
                 reel.Spin(pos + 2, null);
+            }
         }
 
         // 中奖效果在Reel中滞后实现
@@ -285,6 +316,9 @@ public class SlotDisplays : MonoBehaviour
 
     public void PlayAudio(Constants.Audio aud)
     {
+        if (!GlobalVars.instance.GetSE())
+            return;
+
         if (aud >= Constants.Audio.Audio_Max)
         {
             Debug.Log("Ivalid audio enum");

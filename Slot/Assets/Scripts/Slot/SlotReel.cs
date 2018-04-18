@@ -224,7 +224,7 @@ public class SlotReel : MonoBehaviour
         if (m_bufferTimer > 0)
         {
             m_bufferTimer -= Time.deltaTime;
-            if (m_bufferTimer < 0)
+            if (m_bufferTimer <= 0)
             {
                 m_clerk.Displays.StopAudio(Constants.Audio.Audio_ReelRolling);
                 m_clerk.Displays.StopAudio(Constants.Audio.Audio_ReelStop);
@@ -267,7 +267,7 @@ public class SlotReel : MonoBehaviour
         if (m_bonusTimer > 0)
         {
             m_bonusTimer -= Time.deltaTime;
-            if (m_bonusTimer < 0)
+            if (m_bonusTimer <= 0)
             {
                 // 确保都回0度
                 RestoreBonusItems();

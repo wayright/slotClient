@@ -55,6 +55,10 @@ public class DialogReconnect : MonoBehaviour {
         GameObject textObj = transform.Find("Content").gameObject;
         m_text = textObj.GetComponent<Text>();
         m_text.text = m_reconnecting;
+
+        GameObject togObj = transform.Find("Toggle").gameObject;
+        Toggle tog = togObj.GetComponent<Toggle>();
+        tog.isOn = false;
     }
 	
 	// Update is called once per frame

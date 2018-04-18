@@ -41,23 +41,29 @@ public class SlotRequests{
         quickLoginInfo.UserId = m_clerk.UId;
         quickLoginInfo.Key = m_clerk.Key;
 
-        m_net.SendEnqueue(Constants.Client_QuickLoginInfo, 0, quickLoginInfo);
+        m_net.SendEnqueue(Constants.Tiger_QuickLoginInfo, 0, quickLoginInfo);
     }
     public void ReqSpin()
     {
         if (!m_clerk.Login)
         {
             Debug.Log("!Login, cant reqspin");
+            // Show dialog here
+            DialogBase.Show("!Login, cant reqspin");
             return;
         }
 
         TigerReq tigerReq = new TigerReq();
         tigerReq.BetGold = m_clerk.Bet; // only 10, 20, 30
-        tigerReq.SeqNo = m_clerk.SeqNo;
+        // SeqNo 当前用来对应消息ID
+        m_clerk.SeqNo = m_clerk.SpinCount;
+        tigerReq.SeqNo = m_clerk.SpinCount;
+        m_clerk.Begin(); // 开始计时
+
         tigerReq.TigerNo = m_clerk.TigerNo;
         for (int i = 0; i < m_clerk.Lines; ++i)
             tigerReq.Lines.Add(i);
 
-        m_net.SendEnqueue(Constants.Client_TigerReq, 0, tigerReq);        
+        m_net.SendEnqueue(Constants.Tiger_Spin, 0, tigerReq);        
     }
 }

@@ -3,36 +3,36 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DialogQuit : MonoBehaviour {
-    private GameObject m_dialog = null;
-    private const float s_InitScale = 0.6f;
-    private float m_disappear = 0;
-    private float m_show = 0;
-    private bool m_disappearing = false;
-    private bool m_showing = false;
-    public static void Show()
+public class DialogBase : MonoBehaviour {
+    protected GameObject m_dialog = null;
+    protected const float s_InitScale = 0.6f;
+    protected float m_disappear = 0;
+    protected float m_show = 0;
+    protected bool m_disappearing = false;
+    protected bool m_showing = false;
+    public static void Show(string str = "")
     {
         GameObject canvas = GameObject.Find("Canvas");
-        GameObject obj = canvas.transform.Find("DialogQuit").gameObject;
-        DialogQuit dlg = obj.GetComponent<DialogQuit>();
-        dlg.DoShow(obj);
+        GameObject obj = canvas.transform.Find("DialogBase").gameObject;
+        DialogBase dlg = obj.GetComponent<DialogBase>();
+        dlg.DoShow(obj, str);
     }
 
     public static void Hide()
     {
         GameObject canvas = GameObject.Find("Canvas");
-        GameObject obj = canvas.transform.Find("DialogQuit").gameObject;
-        DialogQuit dlg = obj.GetComponent<DialogQuit>();
+        GameObject obj = canvas.transform.Find("DialogBase").gameObject;
+        DialogBase dlg = obj.GetComponent<DialogBase>();
         dlg.DoHide(obj);
     }
     public static bool Actived()
     {
-        GameObject dialog = GameObject.Find("DialogQuit");
+        GameObject dialog = GameObject.Find("DialogBase");
         return dialog != null;
     }
 	// Use this for initialization
-	void Start () {
-        string[] btns = { "Cancel", "OK" };
+	public void Start () {
+        string[] btns = { "Cancel", "OK", "Close" };
         for (int i = 0; i < btns.Length; ++i)
         {
             GameObject btnObj = GameObject.Find(btns[i]);
@@ -53,9 +53,9 @@ public class DialogQuit : MonoBehaviour {
 
     void OnClick(GameObject sender)
     {
-        if (sender.name == "Cancel")
+        if (sender.name == "Cancel" || sender.name == "Close")
         {
-            string btnName = "DialogQuit";
+            string btnName = "DialogBase";
             GameObject btnObj = GameObject.Find(btnName);
             if (null == btnObj)
             {
@@ -63,12 +63,8 @@ public class DialogQuit : MonoBehaviour {
             }
             else
             {
-                //btnObj.SetActive(false);
+                DoHide(btnObj);
             }
-
-            m_dialog = btnObj;
-            m_disappearing = true;
-            m_disappear = s_InitScale;
         }
         else if (sender.name == "OK")
         {
@@ -76,23 +72,36 @@ public class DialogQuit : MonoBehaviour {
             Application.Quit();
         }
     }
-    void DoHide(GameObject obj)
+    public void DoHide(GameObject obj)
     {
         m_dialog = obj;
         m_disappearing = true;
         m_disappear = s_InitScale;
     }
-    void DoShow(GameObject obj)
+    public void DoShow(GameObject obj, string str = "")
     {
         m_dialog = obj;
+        //Debug.Log(m_dialog.transform.position);
+        //m_dialog.transform.position = new Vector3(0, 0, 0);
         m_dialog.transform.localScale = new Vector3(0, 0, 0);
         m_dialog.SetActive(true);
         m_showing = true;
         m_show = s_InitScale;
+
+        Transform tf = m_dialog.transform.Find("Content");
+        if (null != tf)
+        {
+            GameObject contentObj = tf.gameObject;
+            if (contentObj != null)
+            {
+                Text content = contentObj.GetComponent<Text>();
+                content.text = str;
+            }
+        }
     }
 	
 	// Update is called once per frame
-	void Update () {
+	public void Update () {
         if (m_dialog != null)
         {
             if (m_disappearing)
@@ -111,6 +120,8 @@ public class DialogQuit : MonoBehaviour {
                     m_dialog = null;
                     m_disappearing = false;
                 }
+
+                return;
             }
 
             if (m_showing)

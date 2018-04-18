@@ -25,6 +25,7 @@ public class SlotClerk : MonoBehaviour {
     private bool m_autoSpin = false; // 自动摇奖
     //private int m_escapeTimes = 1; // 退出
     public Dictionary<int, int> CallbackDict = new Dictionary<int,int>();
+    private System.Diagnostics.Stopwatch m_stopWatch = new System.Diagnostics.Stopwatch();
 
 	// Use this for initialization
 	void Start () {
@@ -36,20 +37,21 @@ public class SlotClerk : MonoBehaviour {
         m_net = new ProtoNet();
 
         // 增加前台支持的网络包类型
-        m_net.Add(Constants.Server_UserInfo, TigerUserInfo.Parser);
-        m_net.Add(Constants.Server_TigerResp, TigerResp.Parser);
-        m_net.Add(Constants.Client_Reconnect, null);
-        m_net.Add(Constants.Server_Error, null);
+        m_net.Add(Constants.Tiger_QuickLoginInfo, TigerUserInfo.Parser);
+        m_net.Add(Constants.Tiger_Spin, TigerResp.Parser);
+        m_net.Add(Constants.Reconnect, null);
+        m_net.Add(Constants.Error, null);
         m_net.Name = "SlotClerk";
 
         m_login = false;
         m_lines = 1;
         m_win = 0;
         
-        m_id = Lobby.getInstance().UId;
-        m_key = Lobby.getInstance().Key;
         // 启动登录
-        if (false == m_net.Init(Lobby.getInstance().Domain, Lobby.getInstance().Port))
+        RedirectResp rr = Lobby.getInstance().RedirectInfo;
+        m_id = rr.UserId;
+        m_key = rr.Key;
+        if (false == m_net.Init(rr.Domain, rr.Port))
         {
             Debug.Log("Client init failed!");
         }
@@ -95,15 +97,15 @@ public class SlotClerk : MonoBehaviour {
         if (Input.GetKey(KeyCode.Escape))
         {
             //这个地方可以写“再按一次退出”的提示
-            if (DialogQuit.Actived())
+            if (DialogBase.Actived())
             {
-                Debug.Log("Hide");
-                DialogQuit.Hide();
+                Debug.Log("Hide in Clerk");
+                DialogBase.Hide();
             }
             else
             {
-                Debug.Log("Show");
-                DialogQuit.Show();
+                Debug.Log("Show in Clerk");
+                DialogBase.Show();
             }
             //m_escapeTimes++;
             //StartCoroutine("resetTimes");
@@ -160,6 +162,19 @@ public class SlotClerk : MonoBehaviour {
         }
 
         text.text = value.ToString();
+    }
+
+    public void Begin()
+    {
+        m_stopWatch.Start();
+    }
+    public long End()
+    {
+        m_stopWatch.Stop();
+        long elapse = m_stopWatch.ElapsedMilliseconds;
+        m_stopWatch.Reset();
+
+        return elapse;
     }
 
     public int Lines 

@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using Dog.Proto;
 using Login.Proto;
+using Lion.Proto;
+using Common.Proto;
 using System.Threading;
 using UnityEngine.SceneManagement;
 
@@ -16,90 +18,206 @@ public class Reception : MonoBehaviour
     //private int m_gold = 0; // 总金额
     //private int m_key = 0; // Key
     private bool m_login; // 是否登录
-    private ProtoNet m_net; // 网络处理
+    private ProtoNet m_net; // 网络-Dog&Lion
+    private Dictionary<string, int> m_btnIndexDict = new Dictionary<string, int>();
+    private string m_nick; // 临时昵称名
+    private string m_headUrl; // 临时URL
 
     // Use this for initialization
 	void Start () {
-        //m_key = 123456;
-        //m_gold = 0;
-        m_net = new ProtoNet();
         m_login = false;
 
         // 初始化ProtoNet
         m_net = new ProtoNet();
 
         // 增加前台支持的网络包类型
-        m_net.Add(Constants.Server_LoginResp, LoginResp.Parser);
-        m_net.Add(Constants.Server_RedirectResp, RedirectResp.Parser);
-        m_net.Add(Constants.Client_Reconnect, null);
-        m_net.Add(Constants.Server_Error, null);
+        m_net.Add(Constants.Lion_QuickLoginInfo, LionUserInfo.Parser);
+        m_net.Add(Constants.Lion_Redirect, RedirectResp.Parser);
+        m_net.Add(Constants.Lion_GetProfile, LionUserInfo.Parser);
+        m_net.Add(Constants.Lion_UpdateProfile, Status.Parser);
+        m_net.Add(Constants.Lion_Get_Tiger_Stat, TigerStat.Parser);
+        m_net.Add(Constants.Reconnect, null);
+        m_net.Add(Constants.Error, null);
         m_net.Name = "Reception";
 
+        for (int i = 0; i < Constants.LobbyBtn_Strings.Length; ++i)
+        {
+            string btnName = Constants.LobbyBtn_Strings[i];
+            m_btnIndexDict.Add(btnName, i);
+            GameObject btnObj = GameObject.Find(btnName);
+            Button btn = btnObj.GetComponent<Button>();
+            btn.onClick.AddListener(delegate()
+            {
+                this.OnClick(btnObj);
+            });
+        }
+
         // 启动登录
-        if (false == m_net.Init("182.92.74.240", 7900))
-        {
-            // 这里不重连，在发送请求失败后再重连
-            Debug.Log("Client init failed!");
+        Lobby lobby = Lobby.getInstance();
+        Debug.Log("Loading start:" + lobby.Domain);
+        if (lobby.Domain == "")
+        {            
+            SceneManager.LoadSceneAsync("sloading");
         }
-        
-        string btnName = "slot";
-        GameObject btnObj = GameObject.Find(btnName);
-        Button btn = btnObj.GetComponent<Button>();
-        btn.onClick.AddListener(delegate()
+        else
         {
-            this.OnClick(btnObj);
-        });
+            Debug.Log("Loading start2:" + lobby.Domain);
+            if (false == m_net.Init(lobby.Domain, lobby.Port))
+            {
+                // 这里不重连，在发送请求失败后再重连
+                Debug.Log("Reception:Client init failed!");
+            }
 
-        string btnName2 = "poker";
-        GameObject btnObj2 = GameObject.Find(btnName2);
-        Button btn2 = btnObj2.GetComponent<Button>();
-        btn2.onClick.AddListener(delegate()
-        {
-            this.OnClick(btnObj2);
-        });
-        // 登录获取UId
-        //Login();
+            QuickLogin();
+        }
 	}
-
-    void OnClick(GameObject sender)
+    int GetBtnIndexFromName(string btnName)
     {
-        if (sender.name == "slot")
+        if (m_btnIndexDict.ContainsKey(btnName))
         {
-            // 检查是否登录
-            if (m_login)
-            {
-                Redirect();
-            }
-            else
-            {
-                WorkDone callBack = new WorkDone(Redirect);
-                Login(callBack);
-            }
+            return m_btnIndexDict[btnName];
         }
-        else if (sender.name == "poker")
+        else
         {
-            DialogQuit.Show();
+            return -1;
         }
     }
-
-    void Login(WorkDone callBack = null)
+    void OnClick(GameObject sender)
     {
-        LoginReq loginReq = new LoginReq();
-        loginReq.Version = 1;
-        loginReq.Args.Add("TEST");
-        loginReq.Args.Add("1");
-        loginReq.Args.Add("wdz");
+        int btnIndex = GetBtnIndexFromName(sender.name);
+        if (btnIndex < 0)
+        {
+            Debug.Log("Cant find button:" + sender.name);
+            return;
+        }
 
-        m_net.SendEnqueue(Constants.Client_LoginReq,
-            0, 
-            loginReq,
+        switch ((Constants.LobbyBtn)btnIndex)
+        {
+            case Constants.LobbyBtn.Btn_Slot:
+                {
+                    // 检查是否登录
+                    if (m_login)
+                    {
+                        Redirect();
+                    }
+                    else
+                    {
+                        WorkDone callBack = new WorkDone(Redirect);
+                        QuickLogin(callBack);
+                    }
+                }
+                break;
+            case Constants.LobbyBtn.Btn_Poker:
+                {                    
+                    DialogBase.Show("Exit game?");
+                }
+                break;
+            case Constants.LobbyBtn.Btn_Option:
+                {
+                    DialogOption.Show();
+                }
+                break;
+            case Constants.LobbyBtn.Btn_Avatar:
+            case Constants.LobbyBtn.Btn_Head:
+                {
+                    GetProfile(ShowPersonalInfoDlg);
+                }
+                break;
+            case Constants.LobbyBtn.Btn_Message:
+                {
+                    DialogMessage.Show();
+                }
+                break;
+            case Constants.LobbyBtn.Btn_Credits:
+                {
+                    DialogStore.Show(0);
+                }
+                break;
+            case Constants.LobbyBtn.Btn_Gems:
+                {
+                    DialogStore.Show(1);
+                }
+                break;
+            case Constants.LobbyBtn.Btn_Friends:
+                {
+                    DialogFriends.Show();
+                }
+                break;
+            default:
+                DialogBase.Show(sender.name);
+                break;
+        }
+    }
+    void ShowPersonalInfoDlg()
+    {
+        DialogPersonalInfo.Show();
+    }
+    void GetProfile(WorkDone callBack = null)
+    {
+        LongValue lv = new LongValue();
+        Lobby lobby = Lobby.getInstance();
+        lv.Value = lobby.UId;
+
+        m_net.SendEnqueue(Constants.Lion_GetProfile,
+            0,
+            lv,
             callBack);
+    }
+    void QuickLogin(WorkDone callBack = null)
+    {
+        QuickLoginInfo quickLoginInfo = new QuickLoginInfo();
+        Lobby lobby = Lobby.getInstance();
+        quickLoginInfo.UserId = lobby.UId;
+        quickLoginInfo.Key = lobby.Key;
+
+        m_net.SendEnqueue(Constants.Lion_QuickLoginInfo, 
+            0,
+            quickLoginInfo,
+            callBack);
+    }
+    // 更新名字回调函数
+    void AfterUpdateProfileName()
+    {
+        // 个人信息对话框
+        GameObject go = GameObject.Find("InputNickName");
+        if (go == null)
+            Debug.Log("InputNickName is null");
+        else
+        {
+            InputField field = go.GetComponent<InputField>();
+            field.text = m_nick;
+        }
+
+        // 主界面更新
+        GameObject goAvatar = GameObject.Find("BtnAvatar");
+        GameObject goText = goAvatar.transform.Find("Text").gameObject;
+        Text text = goText.GetComponent<Text>();
+        text.text = m_nick;
+
+        LionUserInfo ui = Lobby.getInstance().UserInfo;
+        ui.Name = m_nick;
+    }
+    public void UpdateProfileName(string nickName)
+    {
+        LionUserInfo ui = Lobby.getInstance().UserInfo;
+        if (nickName == "" || nickName == ui.Name)
+            return;
+
+        StringArray sa = new StringArray();
+        sa.Data.Add("Name");
+        sa.Data.Add(nickName);
+        m_nick = nickName;
+
+        m_net.SendEnqueue(Constants.Lion_UpdateProfile,
+            0,
+            sa,
+            AfterUpdateProfileName);
     }
     void CheckLogin()
     {
         if (!m_login)
         {
-            Login();
+            QuickLogin();
         }
     }
 
@@ -107,30 +225,58 @@ public class Reception : MonoBehaviour
     {        
         RedirectReq rdReq = new RedirectReq();
         rdReq.UserId = Lobby.getInstance().UId;
-        rdReq.Svc = 100; // 老虎机
+        rdReq.Svc = Constants.Svc_Tiger; // 重定向到老虎机
         rdReq.Version = 1;
         rdReq.SubSvc = 0;
 
-        m_net.SendEnqueue(Constants.Client_RedirectReq, 0, rdReq);
+        m_net.SendEnqueue(Constants.Lion_Redirect, 0, rdReq);
     }
     void OnApplicationQuit()
     {
         m_net.Close();
     }
+    void UpdateUserInfoUI()
+    {
+        // 大厅主窗口只刷新金币、名称、等级和头像
+        LionUserInfo ui = Lobby.getInstance().UserInfo;
+        
+        // NickName
+        GameObject goAvatar = GameObject.Find("BtnAvatar");
+        GameObject goText = goAvatar.transform.Find("Text").gameObject;
+        Text text = goText.GetComponent<Text>();
+        text.text = ui.Name;
 
+        // Coins
+        GameObject goCredits = GameObject.Find("BtnCredits");
+        goText = goCredits.transform.Find("Text").gameObject;
+        text = goText.GetComponent<Text>();
+        text.text = Tools.CoinToString(ui.Gold);
+        
+        // Level
+        GameObject goStar = GameObject.Find("xp_star");
+        goText = goStar.transform.Find("txtLevel").gameObject;
+        text = goText.GetComponent<Text>();
+        text.text = ui.Level.ToString();
+
+        //  Head
+        if (ui.HeadImgUrl != "")
+        {
+            StartCoroutine(Tools.LoadWWWImageToButton(ui.HeadImgUrl, "BtnHead"));
+        }
+    }
 	// Update is called once per frame
 	void Update () {
-        if (Input.GetKey(KeyCode.Escape))
+        if (Input.GetKeyUp(KeyCode.Escape))
         {
-            if (DialogQuit.Actived())
+            if (DialogBase.Actived())
             {
                 Debug.Log("Hide");
-                DialogQuit.Hide();
+                DialogBase.Hide();
             }
             else
             {
                 Debug.Log("Show");
-                DialogQuit.Show();
+                DialogBase.Show("Are you sure to exit game?");
             }
         }
 
@@ -153,27 +299,30 @@ public class Reception : MonoBehaviour
             Debug.Log("Reception handle cmdId:" + packet.cmdId);
             switch (packet.cmdId)
             {
-                case Constants.Server_LoginResp:
+                case Constants.Lion_QuickLoginInfo:
                     {
-                        LoginResp loginResp = (LoginResp)packet.proto;
-                        Lobby.getInstance().UId = loginResp.UserId;
+                        Lobby.getInstance().UserInfo = (LionUserInfo)packet.proto;// 更新LionUser
                         m_login = true;
-
+                        UpdateUserInfoUI(); // 更新大厅主界面中信息
                         if (packet.callback != null)
                         {
-                            Debug.Log("Call back here");
                             packet.callback();
                         }
                     }
                     break;
-                case Constants.Server_RedirectResp:
+                case Constants.Lion_GetProfile:
                     {
-                        RedirectResp rdResp = (RedirectResp)packet.proto;
-                        Lobby lobby = Lobby.getInstance();
-                        lobby.Domain = rdResp.Domain;
-                        lobby.Port = rdResp.Port;
-                        lobby.Key = rdResp.Key;
-
+                        Lobby.getInstance().UserInfo = (LionUserInfo)packet.proto;// 更新LionUser
+                        if (packet.callback != null)
+                        {
+                            // 通常这里显示个人信息对话框
+                            packet.callback();
+                        }
+                    }
+                    break;
+                case Constants.Lion_Redirect:
+                    {
+                        Lobby.getInstance().RedirectInfo = (RedirectResp)packet.proto;
                         // 切换到游戏场景中
                         m_net.Close();
                         Debug.Log("Reception enter slot scene");
@@ -181,7 +330,24 @@ public class Reception : MonoBehaviour
                         SceneManager.LoadScene("loading");
                     }
                     break;
-                case Constants.Client_Reconnect:
+                case Constants.Lion_UpdateProfile:
+                    {
+                        Debug.Log("Lion_UpdateProfile");
+                        Status stat = (Status)packet.proto;
+                        if (stat.Code == 0)// successful
+                        {
+                            if (packet.callback != null)
+                            {
+                                packet.callback();
+                            }
+                        }
+                        else
+                        {
+                            Debug.Log(stat.Desc);
+                        }
+                    }
+                    break;
+                case Constants.Reconnect:
                     {
                         // 展示重连对话框，直到重连成功
                         ProtoNet.WriteLog("Reconnecting...");
@@ -193,7 +359,7 @@ public class Reception : MonoBehaviour
                         }
                     }
                     break;
-                case Constants.Server_Error:
+                case Constants.Error:
                     {
                         // 展示错误
                     }

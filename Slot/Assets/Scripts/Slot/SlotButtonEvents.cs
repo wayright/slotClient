@@ -106,6 +106,7 @@ public class SlotButtonEvents : MonoBehaviour {
         if (m_clerk.Spinning)
         {
             Debug.Log("I'm spinning!");
+            DialogBase.Show("I'm spinning!SpinSeqNo:" + m_clerk.SeqNo);
             return;
         }
         else
@@ -118,6 +119,7 @@ public class SlotButtonEvents : MonoBehaviour {
         if (m_clerk.Win > 0) // 有奖励没有领取
         {
             Debug.Log("Error!"); // 当前是自动领取
+            DialogBase.Show("有奖励没有领取");
             m_clerk.Displays.ShowJumpWin(); // 点击领取
         }
         else
