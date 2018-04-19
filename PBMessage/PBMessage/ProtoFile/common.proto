@@ -21,7 +21,7 @@ message LongValue {
 }
 
 message LongArray {
-    repeated int32 data = 1;
+    repeated int64 data = 1;
 }
 
 message StringValue {
