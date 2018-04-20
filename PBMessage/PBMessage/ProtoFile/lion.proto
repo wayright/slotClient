@@ -23,3 +23,19 @@ message TigerStat {
 	int64 total_spins = 5;
 }
 
+message FriendSummary {
+	int64 user_id = 1;
+	string name = 2;
+	string head_img_url = 3;
+	int32 level = 4;
+}
+
+message FriendSummaryList {
+	repeated FriendSummary data = 1;
+}
+
+message BonusResp {
+	int64 bonus_gold = 1;
+	int64 gold = 2;
+}
+
