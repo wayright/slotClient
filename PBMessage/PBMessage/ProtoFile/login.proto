@@ -11,7 +11,7 @@ message InnerLoginReq {
     string version = 3; // 消息版本
     string whoami = 4; // 来自何人
     int32 svc = 5; // 服务编号
-    int32 type = 6;  // 类型
+    int32 type = 6; // 类型
     string params = 7; // 其它参数
 }
 
