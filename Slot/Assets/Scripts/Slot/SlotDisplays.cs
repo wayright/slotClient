@@ -217,7 +217,7 @@ public class SlotDisplays : MonoBehaviour
             {
                 if (null == tigerResp.Bonus)
                 {
-                    DialogBase.Show("null == tigerResp.Bonus");
+                    DialogBase.Show("MESSAGE", "null == tigerResp.Bonus");
                 }
                 reel.Spin(pos + 2, tigerResp.Bonus);
             }

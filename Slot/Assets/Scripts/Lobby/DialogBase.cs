@@ -5,17 +5,18 @@ using UnityEngine.UI;
 
 public class DialogBase : MonoBehaviour {
     protected GameObject m_dialog = null;
-    protected const float s_InitScale = 0.6f;
+    protected const float s_InitScale = 0.1f;
     protected float m_disappear = 0;
     protected float m_show = 0;
     protected bool m_disappearing = false;
     protected bool m_showing = false;
-    public static void Show(string str = "")
+    private WorkDone m_callBack = null;
+    public static void Show(string title, string content, WorkDone cb = null)
     {
         GameObject canvas = GameObject.Find("Canvas");
         GameObject obj = canvas.transform.Find("DialogBase").gameObject;
         DialogBase dlg = obj.GetComponent<DialogBase>();
-        dlg.DoShow(obj, str);
+        dlg.DoShow(obj, title, content, cb);
     }
 
     public static void Hide()
@@ -69,7 +70,15 @@ public class DialogBase : MonoBehaviour {
         else if (sender.name == "OK")
         {
             Debug.Log("OK");
-            Application.Quit();
+            if (m_callBack != null)
+            {
+                m_callBack();
+                m_callBack = null;
+            }
+
+            string btnName = "DialogBase";
+            GameObject btnObj = GameObject.Find(btnName);
+            DoHide(btnObj);
         }
     }
     public void DoHide(GameObject obj)
@@ -78,7 +87,10 @@ public class DialogBase : MonoBehaviour {
         m_disappearing = true;
         m_disappear = s_InitScale;
     }
-    public void DoShow(GameObject obj, string str = "")
+    public void DoShow(GameObject obj,
+        string title = "TIP", 
+        string content = "Are you sure to exit game?",
+        WorkDone cb = null)
     {
         m_dialog = obj;
         //Debug.Log(m_dialog.transform.position);
@@ -94,10 +106,23 @@ public class DialogBase : MonoBehaviour {
             GameObject contentObj = tf.gameObject;
             if (contentObj != null)
             {
-                Text content = contentObj.GetComponent<Text>();
-                content.text = str;
+                Text contentText = contentObj.GetComponent<Text>();
+                contentText.text = content;
             }
         }
+
+        tf = m_dialog.transform.Find("Title");
+        if (null != tf)
+        {
+            GameObject contentObj = tf.gameObject;
+            if (contentObj != null)
+            {
+                Text titleText = contentObj.GetComponent<Text>();
+                titleText.text = title;
+            }
+        }
+
+        m_callBack = cb;
     }
 	
 	// Update is called once per frame

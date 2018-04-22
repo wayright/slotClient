@@ -12,7 +12,18 @@ public class Constants{
     public const int Lion_QuickLoginInfo = 4000; // 大厅快速登录
     public const int Lion_GetProfile = 4001; // 获取某个玩家的个人资料
     public const int Lion_UpdateProfile = 4002; // 更新个人资料某一项
-    public const int Lion_Get_Tiger_Stat = 4300; // 获取某个玩家的老虎机统计信息
+    public const int Lion_GetTigerStat = 4300; // 获取某个玩家的老虎机统计信息
+    public const int Lion_GetFriends = 4021; // 获取好友ID列表
+    public const int Lion_GetFriendRequests = 4022; // 获取请求加好友ID列表
+    public const int Lion_AddFriend = 4023; // 申请加好友
+    public const int Lion_DeleteFriend = 4024; // 删除好友
+    public const int Lion_AcceptFriend = 4025; // 同意加好友
+    public const int Lion_IgnoreFriend = 4026; // 忽略加好友
+    public const int Lion_GetFriendSummary = 4027; // 获取部分好友的简介
+    public const int Lion_NotifyWeeklyLogin = 4201; // 后端推送，前端弹出连续登录面板，根据后端的值设置第几天可领取
+    public const int Lion_TakeLoginBonus = 4202; // 领取连续登录奖励
+    public const int Lion_NotifyFreeBonus = 4203; // 后端推送，倒计时的时间点，如果当前时间已经超过，直接显示奖励
+    public const int Lion_TakeFreeBonus = 4204; // 领取免费奖励
     
     // Slot-Tiger
     public const int Tiger_QuickLoginInfo = 10000; // Tiger快速登录
@@ -21,6 +32,7 @@ public class Constants{
     // #Common
     public const int Reconnect = 99999; // 本地重连
     public const int Error = -1;// 服务器错误
+    public const int PageItemCount = 6; // 一页容纳几项
     
     //// 资源（包括按钮、音效等）
     // #Lobby

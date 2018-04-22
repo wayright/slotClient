@@ -48,7 +48,7 @@ public class DialogOption : DialogBase
         }
     }
 
-    new public static void Show(string str = "")
+    public static void Show(string str = "")
     {
         GameObject canvas = GameObject.Find("Canvas");
         GameObject obj = canvas.transform.Find(DialogName).gameObject;

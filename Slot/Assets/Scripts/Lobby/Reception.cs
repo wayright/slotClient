@@ -21,7 +21,6 @@ public class Reception : MonoBehaviour
     private ProtoNet m_net; // 网络-Dog&Lion
     private Dictionary<string, int> m_btnIndexDict = new Dictionary<string, int>();
     private string m_nick; // 临时昵称名
-    private string m_headUrl; // 临时URL
 
     // Use this for initialization
 	void Start () {
@@ -35,7 +34,19 @@ public class Reception : MonoBehaviour
         m_net.Add(Constants.Lion_Redirect, RedirectResp.Parser);
         m_net.Add(Constants.Lion_GetProfile, LionUserInfo.Parser);
         m_net.Add(Constants.Lion_UpdateProfile, Status.Parser);
-        m_net.Add(Constants.Lion_Get_Tiger_Stat, TigerStat.Parser);
+        m_net.Add(Constants.Lion_GetTigerStat, TigerStat.Parser);
+        m_net.Add(Constants.Lion_GetFriends, LongArray.Parser);
+        m_net.Add(Constants.Lion_GetFriendRequests, LongArray.Parser);
+        m_net.Add(Constants.Lion_AddFriend, Status.Parser);
+        m_net.Add(Constants.Lion_DeleteFriend, Status.Parser);
+        m_net.Add(Constants.Lion_AcceptFriend, Status.Parser);
+        m_net.Add(Constants.Lion_IgnoreFriend, Status.Parser);
+        m_net.Add(Constants.Lion_GetFriendSummary, FriendSummaryList.Parser);
+        m_net.Add(Constants.Lion_NotifyWeeklyLogin, IntValue.Parser);
+        m_net.Add(Constants.Lion_TakeLoginBonus, LongArray.Parser);
+        m_net.Add(Constants.Lion_NotifyFreeBonus, LongValue.Parser);
+        m_net.Add(Constants.Lion_TakeFreeBonus, LongArray.Parser);
+        m_net.Add(-2, null);
         m_net.Add(Constants.Reconnect, null);
         m_net.Add(Constants.Error, null);
         m_net.Name = "Reception";
@@ -109,7 +120,7 @@ public class Reception : MonoBehaviour
                 break;
             case Constants.LobbyBtn.Btn_Poker:
                 {                    
-                    DialogBase.Show("Exit game?");
+                    DialogBase.Show("POKER", "Exit game?", Application.Quit());
                 }
                 break;
             case Constants.LobbyBtn.Btn_Option:
@@ -120,7 +131,7 @@ public class Reception : MonoBehaviour
             case Constants.LobbyBtn.Btn_Avatar:
             case Constants.LobbyBtn.Btn_Head:
                 {
-                    GetProfile(ShowPersonalInfoDlg);
+                    GetProfile(Lobby.getInstance().UId, ShowPersonalInfoDlg);
                 }
                 break;
             case Constants.LobbyBtn.Btn_Message:
@@ -140,27 +151,141 @@ public class Reception : MonoBehaviour
                 break;
             case Constants.LobbyBtn.Btn_Friends:
                 {
-                    DialogFriends.Show();
+                    // 根据ActivePage获取数据
+                    GetFriends();                    
+                }
+                break;
+            case Constants.LobbyBtn.Btn_FreeBonus:
+                {
+                    TakeFreeBonus();
                 }
                 break;
             default:
-                DialogBase.Show(sender.name);
+                DialogBase.Show("Button clicked", sender.name);
                 break;
         }
     }
     void ShowPersonalInfoDlg()
     {
-        DialogPersonalInfo.Show();
+        DialogPersonalInfo.Show(Lobby.getInstance().UserInfo);
     }
-    void GetProfile(WorkDone callBack = null)
+    public void GetProfile(long uId, WorkDone callBack = null)
     {
         LongValue lv = new LongValue();
-        Lobby lobby = Lobby.getInstance();
-        lv.Value = lobby.UId;
+        lv.Value = uId;
 
         m_net.SendEnqueue(Constants.Lion_GetProfile,
             0,
             lv,
+            callBack);
+    }
+    public void TakeLoginBonus(WorkDone callBack = null)
+    {
+        Empty empty = new Empty();
+
+        m_net.SendEnqueue(Constants.Lion_TakeLoginBonus,
+            0,
+            empty,
+            callBack);
+    }
+    public void TakeFreeBonus(WorkDone callBack = null)
+    {
+        Empty empty = new Empty();
+
+        m_net.SendEnqueue(Constants.Lion_TakeFreeBonus,
+            0,
+            empty,
+            callBack);
+    }
+    void ShowFriendsDlg()
+    {
+        DialogFriends.Show();
+    }
+    public void GetFriendSummaryByUId(long uId, WorkDone callBack = null)
+    {
+        LongArray laArray = new LongArray();
+        laArray.Data.Add(uId);
+
+        m_net.SendEnqueue(Constants.Lion_GetFriendSummary,
+                    0,
+                    laArray,
+                    callBack);
+    }
+    public void IgnoreFriend(long uId, WorkDone callBack)
+    {
+        LongValue lv = new LongValue();
+        lv.Value = uId;
+
+        m_net.SendEnqueue(Constants.Lion_IgnoreFriend,
+            0,
+            lv,
+            callBack);
+    }
+    public void AcceptFriend(long uId, WorkDone callBack)
+    {
+        LongValue lv = new LongValue();
+        lv.Value = uId;
+
+        m_net.SendEnqueue(Constants.Lion_AcceptFriend,
+            0,
+            lv,
+            callBack);
+    }
+    public void AddFriend(long uId, WorkDone callBack)
+    {
+        LongValue lv = new LongValue();
+        lv.Value = uId;
+
+        m_net.SendEnqueue(Constants.Lion_AddFriend,
+            0,
+            lv,
+            callBack);
+    }
+    public void RemoveFriend(long uId, WorkDone callBack)
+    {
+        LongValue lv = new LongValue();
+        lv.Value = uId;
+
+        m_net.SendEnqueue(Constants.Lion_DeleteFriend,
+            0,
+            lv,
+            callBack);
+    }
+    public void GetFriendSummary(WorkDone callBack = null)
+    {
+        // 初始显示第一页
+        LongArray fIdArray = Lobby.getInstance().GetCurrentFriendPageArray();
+        Debug.Log("Friend summary count:" + fIdArray.Data.Count);
+
+        m_net.SendEnqueue(Constants.Lion_GetFriendSummary,
+            0,
+            fIdArray,
+            callBack);
+    }
+    public void HearBeat(WorkDone callBack = null)
+    {
+        Empty empty = new Empty();
+        m_net.SendEnqueue(-2,
+            0,
+            empty,
+            callBack);
+    }
+    public void GetFriends(WorkDone callBack = null)
+    {
+        Empty empty = new Empty();
+        
+        m_net.SendEnqueue(Constants.Lion_GetFriends,
+            0,
+            empty,
+            callBack);
+    }
+    public void GetFriendRequests(WorkDone callBack = null)
+    {
+        Empty empty = new Empty();
+
+        m_net.SendEnqueue(Constants.Lion_GetFriendRequests,
+            0,
+            empty,
             callBack);
     }
     void QuickLogin(WorkDone callBack = null)
@@ -213,6 +338,15 @@ public class Reception : MonoBehaviour
             sa,
             AfterUpdateProfileName);
     }
+    public void GetTigerStatInfo(long uId, WorkDone cb)
+    {
+        LongValue lv = new LongValue();
+        lv.Value = uId;
+        m_net.SendEnqueue(Constants.Lion_GetTigerStat,
+            0,
+            lv,
+            cb);        
+    }
     void CheckLogin()
     {
         if (!m_login)
@@ -264,6 +398,29 @@ public class Reception : MonoBehaviour
             StartCoroutine(Tools.LoadWWWImageToButton(ui.HeadImgUrl, "BtnHead"));
         }
     }
+    public void StartCountDown(long val)
+    {
+        string btnStr = Constants.LobbyBtn_Strings[(int)Constants.LobbyBtn.Btn_FreeBonus];
+        GameObject go = GameObject.Find(btnStr);
+        CountDown cd = go.transform.Find("Text").gameObject.GetComponent<CountDown>();
+        cd.LeftTime = val;
+
+        go.GetComponent<Button>().interactable = false;
+        go.transform.Find("Coin").gameObject.SetActive(false);
+        go.transform.Find("Text").gameObject.SetActive(true);
+    }
+    public void EndCountDown()
+    {
+        string btnStr = Constants.LobbyBtn_Strings[(int)Constants.LobbyBtn.Btn_FreeBonus];
+        GameObject go = GameObject.Find(btnStr);
+        CountDown cd = go.transform.Find("Text").gameObject.GetComponent<CountDown>();
+        if (cd.LeftTime > 0)
+            cd.LeftTime = 0;
+        
+        go.GetComponent<Button>().interactable = true;
+        go.transform.Find("Text").gameObject.SetActive(false);
+        go.transform.Find("Coin").gameObject.SetActive(true);
+    }
 	// Update is called once per frame
 	void Update () {
         if (Input.GetKeyUp(KeyCode.Escape))
@@ -276,7 +433,7 @@ public class Reception : MonoBehaviour
             else
             {
                 Debug.Log("Show");
-                DialogBase.Show("Are you sure to exit game?");
+                DialogBase.Show("ESC", "Are you sure to exit game?");
             }
         }
 
@@ -312,11 +469,69 @@ public class Reception : MonoBehaviour
                     break;
                 case Constants.Lion_GetProfile:
                     {
-                        Lobby.getInstance().UserInfo = (LionUserInfo)packet.proto;// 更新LionUser
+                        LionUserInfo usrInfo = (LionUserInfo)packet.proto;// 更新LionUser
+                        if (usrInfo.UserId == Lobby.getInstance().UId)
+                        {
+                            Lobby.getInstance().UserInfo = usrInfo;
+                        }
+                        Lobby.getInstance().QueryUserInfo = usrInfo;
+
                         if (packet.callback != null)
                         {
                             // 通常这里显示个人信息对话框
                             packet.callback();
+                        }
+                    }
+                    break;
+                case Constants.Lion_GetTigerStat:
+                    {
+                        Lobby.getInstance().TigerStatInfo = (TigerStat)packet.proto;
+                        if (packet.callback != null)
+                        {
+                            packet.callback();
+                        }
+                    }
+                    break;
+                case Constants.Lion_GetFriendRequests:                   
+                case Constants.Lion_GetFriends:
+                    {
+                        Lobby.getInstance().FriendIDArray = (LongArray)packet.proto;
+                        if (packet.callback != null)
+                        {
+                            GetFriendSummary(packet.callback);
+                        }
+                        else
+                        {
+                            GetFriendSummary(ShowFriendsDlg);
+                        }
+                    }
+                    break;
+                case Constants.Lion_GetFriendSummary:
+                    {
+                        Lobby.getInstance().CurrentSummaryList = (FriendSummaryList)packet.proto;
+                        Debug.Log("Summary count:" + Lobby.getInstance().CurrentSummaryList.Data.Count);
+                        if (packet.callback != null)
+                        {
+                           packet.callback();
+                        }
+                    }
+                    break;
+                case Constants.Lion_IgnoreFriend:
+                case Constants.Lion_AcceptFriend:
+                case Constants.Lion_AddFriend:
+                case Constants.Lion_DeleteFriend:
+                    {
+                        Status stat = (Status)packet.proto;
+                        if (stat.Code == 0)// successful
+                        {
+                            if (packet.callback != null)
+                            {
+                                packet.callback();
+                            }
+                        }
+                        else
+                        {
+                            Debug.Log(stat.Desc);
                         }
                     }
                     break;
@@ -345,6 +560,40 @@ public class Reception : MonoBehaviour
                         {
                             Debug.Log(stat.Desc);
                         }
+                    }
+                    break;
+                case Constants.Lion_NotifyWeeklyLogin:
+                    {
+                        // 连续登录奖励
+                        IntValue iv = (IntValue)packet.proto;
+                        DialogDailyBonus.Show(iv.Value);
+                    }
+                    break;
+                case Constants.Lion_TakeLoginBonus:
+                    {
+                        LongArray la = (LongArray)packet.proto;
+                        Debug.Log("Take login bonus!");
+                    }
+                    break;
+                case Constants.Lion_NotifyFreeBonus:
+                    {
+                        // 免费奖励
+                        LongValue lv = (LongValue)packet.proto;                              
+                        if (lv.Value == 0)
+                        {
+                            EndCountDown();
+                        }
+                        else
+                        {
+                            Debug.Log("Lion_NotifyFreeBonus:" + lv.Value);
+                            StartCountDown(5);
+                        }
+                    }
+                    break;
+                case Constants.Lion_TakeFreeBonus:
+                    {
+                        LongArray la = (LongArray)packet.proto;
+                        Debug.Log("Take free bonus!");
                     }
                     break;
                 case Constants.Reconnect:

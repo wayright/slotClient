@@ -52,7 +52,9 @@ public class ProtoNet
     private Dictionary<int, MessageParser> m_types = new Dictionary<int, MessageParser>(); // 序列化支持的类型
     private string m_name; // 当前Net的名称
     private float m_rcElapse = 0; // 重连间隔
+    private int m_msgId = 10000;
     private Dictionary<int, WorkDone> m_callbackDict = new Dictionary<int, WorkDone>(); // 回调函数列表
+    private Dictionary<int, int> m_callBackElapse = new Dictionary<int, int>(); // 回调函数存在时间，过长时间定期删除
 
     public string Name
     {
@@ -263,18 +265,19 @@ public class ProtoNet
     /// <param name="obj">proto</param>
     public void SendEnqueue(int cmdId, int msgId, object obj, WorkDone cb = null)
     {
-        ProtoPacket packet = new ProtoPacket();
-        packet.cmdId = cmdId;
-        packet.msgId = msgId;
-        packet.proto = obj;
-
-        m_sendQueue.Enqueue(packet);
-
         // 检查回调函数列表
         if (cb != null)
         {
-            m_callbackDict.Add(cmdId, cb);
+            m_callbackDict.Add(m_msgId, cb);
+            m_callBackElapse.Add(m_msgId, System.DateTime.Now.Second);
         }
+
+        ProtoPacket packet = new ProtoPacket();
+        packet.cmdId = cmdId;
+        packet.msgId = m_msgId++;
+        packet.proto = obj;
+
+        m_sendQueue.Enqueue(packet);
     }
 
     /// <summary>  
@@ -544,13 +547,33 @@ public class ProtoNet
 
             ProtoPacket packet = new ProtoPacket();
             packet.cmdId = cmdId;
-            packet.msgId = msgId;
+            packet.msgId = msgId;            
 
             // 检查回调函数列表
-            if (m_callbackDict.ContainsKey(cmdId))
+            if (m_callbackDict.ContainsKey(msgId))
             {
-                packet.callback = m_callbackDict[cmdId];
-                m_callbackDict.Remove(cmdId);
+                packet.callback = m_callbackDict[msgId];
+                m_callbackDict.Remove(msgId);
+            }
+
+            // 检查回调超时
+            int secCur = System.DateTime.Now.Second;
+            List<int> delList = new List<int>();
+            foreach (var item in m_callBackElapse)
+            {
+                int sec = item.Value;
+                if (secCur - sec > 30)
+                {
+                    delList.Add(item.Key);
+                }
+            }
+
+            for (int i = 0; i < delList.Count; ++i )
+            {
+                int key = delList[i];
+                Debug.Log("Delete time out callback");
+                m_callbackDict.Remove(key);
+                m_callBackElapse.Remove(key);
             }
 
             if (!m_types.ContainsKey(cmdId))

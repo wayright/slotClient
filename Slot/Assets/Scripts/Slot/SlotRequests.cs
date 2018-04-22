@@ -49,7 +49,7 @@ public class SlotRequests{
         {
             Debug.Log("!Login, cant reqspin");
             // Show dialog here
-            DialogBase.Show("!Login, cant reqspin");
+            DialogBase.Show("MESSAGE", "!Login, cant reqspin");
             return;
         }
 

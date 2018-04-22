@@ -92,6 +92,7 @@ public class StartLoading : MonoBehaviour {
                     {
                         LoginResp loginResp = (LoginResp)packet.proto;
                         Lobby.getInstance().UId = loginResp.UserId;
+                        Debug.Log("UId:" + loginResp.UserId);
                         m_login = true;
                         
                         // 登录成功，重定向

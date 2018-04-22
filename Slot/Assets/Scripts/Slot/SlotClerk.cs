@@ -105,7 +105,7 @@ public class SlotClerk : MonoBehaviour {
             else
             {
                 Debug.Log("Show in Clerk");
-                DialogBase.Show();
+                DialogBase.Show("ESC", "Exit game?");
             }
             //m_escapeTimes++;
             //StartCoroutine("resetTimes");

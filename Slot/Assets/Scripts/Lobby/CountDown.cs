@@ -5,6 +5,11 @@ using UnityEngine.UI;
 
 public class CountDown : MonoBehaviour {
     private float m_cdLeft = 4 * 60 * 60;
+    public long LeftTime
+    {
+        get { return (int)m_cdLeft; }
+        set { m_cdLeft = value; }
+    }
 	// Use this for initialization
 	void Start () {
 		
@@ -12,6 +17,11 @@ public class CountDown : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        if (m_cdLeft <= 0)
+        {
+            return;
+        }
+
         int before = (int)m_cdLeft;
         m_cdLeft -= Time.deltaTime;
         int after = (int)m_cdLeft;
@@ -36,6 +46,12 @@ public class CountDown : MonoBehaviour {
             ts += s.ToString();
 
             GetComponent<Text>().text = ts;
+        }
+
+        if (after == 0)
+        {
+            Reception recp = GameObject.Find("Reception").GetComponent<Reception>();
+            recp.EndCountDown();
         }
 	}
 }

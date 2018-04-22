@@ -50,7 +50,7 @@ public class Tools
             //获取Texture
             Texture2D texture = www.texture;
 
-            //创建Sprite
+            //创建Sprite 内存泄漏！！！ 暂时不用
             Sprite sprite = Sprite.Create(texture,
                 new Rect(0, 0, texture.width, texture.height),
                 new Vector2(0.5f, 0.5f));
