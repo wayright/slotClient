@@ -8,11 +8,29 @@ option java_outer_classname = "ItemProto";
 message ItemUnit {
     int32 item_id = 1;
     int32 item_count = 2;
+    int64 expireTime = 3;
+    string attr = 4;
 }
 
-message UserItems {
+message UserItemList {
     int64 user_id = 1;
-    repeated ItemUnit data = 2;
+    string kind = 2;
+    repeated ItemUnit data = 3;
+}
+
+message ItemGiveRecord {
+    int64 sender_id = 1;
+    int64 receiver_id = 2;
+    int64 time = 3;
+    int32 item_id = 4;
+    int32 item_count = 5;
+    int32 status = 6;
+}
+
+message UserItemGiveList {
+    int64 user_id = 1;
+    repeated ItemGiveRecord data = 2;
+    string game_id = 3;
 }
 
 message GiveReq {
