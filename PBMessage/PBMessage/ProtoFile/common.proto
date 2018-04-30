@@ -32,9 +32,30 @@ message StringArray {
     repeated string data = 1;
 }
 
+message DoubleValue {
+    double value = 1;
+}
+
+message DoubleArray {
+    repeated double data = 1;
+}
+
 message StringLongValue {
     string string_value = 1;
     int64 long_value = 2;
+}
+
+message StringDoubleValue {
+    string string_value = 1;
+    double double_value = 2;
+}
+
+message ByteStringValue {
+    bytes value = 1;
+}
+
+message ByteStringArray {
+    repeated bytes data = 1;
 }
 
 message Status {

@@ -6,28 +6,28 @@ option java_package = "studio.first.proto.lion";
 option java_outer_classname = "LionProto";
 
 message LionUserInfo {
-    int64 user_id = 1;
-    int64 gold = 2;
-    string name = 3;
-    string head_img_url = 4;
-    int32 level = 5;
-    string location = 6;
-    int32 praise = 7;
+    int64 user_id = 1; // 玩家id
+    int64 gold = 2; // 金币数
+    string name = 3; // 玩家昵称
+    string head_img_url = 4; // 头像
+    int32 level = 5; // 等级
+    string location = 6; // 地点
+    int32 praise = 7; // 点赞，好感度
 }
 
 message TigerStat {
-    int64 user_id = 1;
-    int64 total_win = 2;
-    int64 biggest_win = 3;
-    int64 win_spins = 4;
-    int64 total_spins = 5;
+    int64 user_id = 1; // 玩家id
+    int64 total_win = 2; // 总赢取金币
+    int64 biggest_win = 3; // 最多一次赢取金币
+    int64 win_spins = 4; // 转老虎机赢得次数
+    int64 total_spins = 5; // 转老虎机总次数
 }
 
 message FriendSummary {
-    int64 user_id = 1;
-    string name = 2;
-    string head_img_url = 3;
-    int32 level = 4;
+    int64 user_id = 1; // 玩家id
+    string name = 2; // 玩家昵称
+    string head_img_url = 3; // 头像
+    int32 level = 4; // 等级
 }
 
 message FriendSummaryList {
@@ -35,7 +35,21 @@ message FriendSummaryList {
 }
 
 message BonusResp {
-    int64 bonus_gold = 1;
-    int64 gold = 2;
+    int64 bonus_gold = 1; // 奖励金币
+    int64 gold = 2; // 总金币
+}
+
+message ShopItem {
+    int32 item_id = 1; // 物品id
+    string item_url = 2; // 物品图片url
+    string item_desc = 3; // 物品描述
+    double price = 4; // 当前价格
+    double oldPrice = 5; // 之前价格
+    int64 expire = 6; // 还有多久过期，时间长度毫秒
+}
+
+message ShopList {
+    string shop_name = 1; // 商店名称
+    repeated ShopItem data = 2; // 商店货架商品
 }
 
