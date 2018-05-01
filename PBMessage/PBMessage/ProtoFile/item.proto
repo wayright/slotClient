@@ -8,7 +8,7 @@ option java_outer_classname = "ItemProto";
 message ItemUnit {
     int32 item_id = 1; // 道具id
     int32 item_count = 2; // 道具数量
-    int64 expireTime = 3; // 过期时间点，如果超过这个时间没有被使用，则会被系统回收
+    int64 expire_time = 3; // 过期时间点，如果超过这个时间没有被使用，则会被系统回收
     string attr = 4; // 其它额外属性，暂时不用
 }
 
