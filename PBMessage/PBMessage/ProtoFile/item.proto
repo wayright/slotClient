@@ -6,16 +6,16 @@ option java_package = "studio.first.proto.base";
 option java_outer_classname = "ItemProto";
 
 message ItemUnit {
-    int32 item_id = 1;
-    int32 item_count = 2;
-    int64 expireTime = 3;
-    string attr = 4;
+    int32 item_id = 1; // 道具id
+    int32 item_count = 2; // 道具数量
+    int64 expireTime = 3; // 过期时间点，如果超过这个时间没有被使用，则会被系统回收
+    string attr = 4; // 其它额外属性，暂时不用
 }
 
 message UserItemList {
-    int64 user_id = 1;
-    string kind = 2;
-    repeated ItemUnit data = 3;
+    int64 user_id = 1; // 用户id
+    string kind = 2; // 分类，道具多了，可能要tab分页显示不同类别
+    repeated ItemUnit data = 3; // 道具列表
 }
 
 message ItemGiveRecord {
@@ -34,9 +34,9 @@ message UserItemGiveList {
 }
 
 message GiveReq {
-    int64 receiver_id = 1;
-    int32 item_id = 2;
-    int32 item_count = 3;
+    int64 receiver_id = 1; // 接受者id
+    int32 item_id = 2; // 道具id
+    int32 item_count = 3; // 道具数量
 }
 
 message CommonReq {

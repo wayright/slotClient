@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-
 package Login.Proto;
 option java_package = "studio.first.proto.base";
 option java_outer_classname = "LoginProto";
@@ -41,21 +40,21 @@ message QuickLoginInfo {
 }
 
 message RedirectReq {
-    int32 version = 1;
-    int32 svc = 2;
-    int32 sub_svc = 3;
-    repeated string args = 4;
-    int64 user_id = 5;
+    int32 version = 1; // 消息版本号
+    int32 svc = 2; // 主服务号（区分不同的玩法）
+    int32 sub_svc = 3; // 子服务号（区分同一玩法不同的场，例如初级、中级、高级）
+    repeated string args = 4; // 其它参数，根据版本号确认参数含义
+    int64 user_id = 5; // 玩家id
 }
 
 message RedirectResp {
-    int32 version = 1;
-    int32 svc = 2;
-    int32 sub_svc = 3;
-    repeated string args = 4;
-    string domain = 5;
-    int32 port = 6;
-    int64 user_id = 7;
-    int64 key = 8;
-    int32 code = 9;
+    int32 version = 1; // 消息版本号
+    int32 svc = 2; // 主服务号（区分不同的玩法）
+    int32 sub_svc = 3;  // 子服务号（区分同一玩法不同的场，例如初级、中级、高级）
+    repeated string args = 4; // 其它参数，根据版本号确认参数含义
+    string domain = 5; // 域名或ip
+    int32 port = 6; // 端口
+    int64 user_id = 7; // 玩家id
+    int64 key = 8; // 登陆key
+    int32 code = 9; // 状态码
 }
