@@ -29,13 +29,27 @@ namespace Lion.Proto {
             "aGVhZF9pbWdfdXJsGAQgASgJEg0KBWxldmVsGAUgASgFEhAKCGxvY2F0aW9u",
             "GAYgASgJEg4KBnByYWlzZRgHIAEoBSJsCglUaWdlclN0YXQSDwoHdXNlcl9p",
             "ZBgBIAEoAxIRCgl0b3RhbF93aW4YAiABKAMSEwoLYmlnZ2VzdF93aW4YAyAB",
-            "KAMSEQoJd2luX3NwaW5zGAQgASgDEhMKC3RvdGFsX3NwaW5zGAUgASgDQiQK",
-            "F3N0dWRpby5maXJzdC5wcm90by5saW9uQglMaW9uUHJvdG9iBnByb3RvMw=="));
+            "KAMSEQoJd2luX3NwaW5zGAQgASgDEhMKC3RvdGFsX3NwaW5zGAUgASgDIlMK",
+            "DUZyaWVuZFN1bW1hcnkSDwoHdXNlcl9pZBgBIAEoAxIMCgRuYW1lGAIgASgJ",
+            "EhQKDGhlYWRfaW1nX3VybBgDIAEoCRINCgVsZXZlbBgEIAEoBSI8ChFGcmll",
+            "bmRTdW1tYXJ5TGlzdBInCgRkYXRhGAEgAygLMhkuTGlvbi5Qcm90by5Gcmll",
+            "bmRTdW1tYXJ5Ii0KCUJvbnVzUmVzcBISCgpib251c19nb2xkGAEgASgDEgwK",
+            "BGdvbGQYAiABKAMicQoIU2hvcEl0ZW0SDwoHaXRlbV9pZBgBIAEoBRIQCghp",
+            "dGVtX3VybBgCIAEoCRIRCglpdGVtX2Rlc2MYAyABKAkSDQoFcHJpY2UYBCAB",
+            "KAESEAoIb2xkUHJpY2UYBSABKAESDgoGZXhwaXJlGAYgASgDIkEKCFNob3BM",
+            "aXN0EhEKCXNob3BfbmFtZRgBIAEoCRIiCgRkYXRhGAIgAygLMhQuTGlvbi5Q",
+            "cm90by5TaG9wSXRlbUIkChdzdHVkaW8uZmlyc3QucHJvdG8ubGlvbkIJTGlv",
+            "blByb3RvYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Lion.Proto.LionUserInfo), global::Lion.Proto.LionUserInfo.Parser, new[]{ "UserId", "Gold", "Name", "HeadImgUrl", "Level", "Location", "Praise" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Lion.Proto.TigerStat), global::Lion.Proto.TigerStat.Parser, new[]{ "UserId", "TotalWin", "BiggestWin", "WinSpins", "TotalSpins" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Lion.Proto.TigerStat), global::Lion.Proto.TigerStat.Parser, new[]{ "UserId", "TotalWin", "BiggestWin", "WinSpins", "TotalSpins" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Lion.Proto.FriendSummary), global::Lion.Proto.FriendSummary.Parser, new[]{ "UserId", "Name", "HeadImgUrl", "Level" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Lion.Proto.FriendSummaryList), global::Lion.Proto.FriendSummaryList.Parser, new[]{ "Data" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Lion.Proto.BonusResp), global::Lion.Proto.BonusResp.Parser, new[]{ "BonusGold", "Gold" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Lion.Proto.ShopItem), global::Lion.Proto.ShopItem.Parser, new[]{ "ItemId", "ItemUrl", "ItemDesc", "Price", "OldPrice", "Expire" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Lion.Proto.ShopList), global::Lion.Proto.ShopList.Parser, new[]{ "ShopName", "Data" }, null, null, null)
           }));
     }
     #endregion
@@ -85,6 +99,9 @@ namespace Lion.Proto {
     /// <summary>Field number for the "user_id" field.</summary>
     public const int UserIdFieldNumber = 1;
     private long userId_;
+    /// <summary>
+    /// 玩家id
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long UserId {
       get { return userId_; }
@@ -96,6 +113,9 @@ namespace Lion.Proto {
     /// <summary>Field number for the "gold" field.</summary>
     public const int GoldFieldNumber = 2;
     private long gold_;
+    /// <summary>
+    /// 金币数
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long Gold {
       get { return gold_; }
@@ -107,6 +127,9 @@ namespace Lion.Proto {
     /// <summary>Field number for the "name" field.</summary>
     public const int NameFieldNumber = 3;
     private string name_ = "";
+    /// <summary>
+    /// 玩家昵称
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string Name {
       get { return name_; }
@@ -118,6 +141,9 @@ namespace Lion.Proto {
     /// <summary>Field number for the "head_img_url" field.</summary>
     public const int HeadImgUrlFieldNumber = 4;
     private string headImgUrl_ = "";
+    /// <summary>
+    /// 头像
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string HeadImgUrl {
       get { return headImgUrl_; }
@@ -129,6 +155,9 @@ namespace Lion.Proto {
     /// <summary>Field number for the "level" field.</summary>
     public const int LevelFieldNumber = 5;
     private int level_;
+    /// <summary>
+    /// 等级
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Level {
       get { return level_; }
@@ -140,6 +169,9 @@ namespace Lion.Proto {
     /// <summary>Field number for the "location" field.</summary>
     public const int LocationFieldNumber = 6;
     private string location_ = "";
+    /// <summary>
+    /// 地点
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string Location {
       get { return location_; }
@@ -151,6 +183,9 @@ namespace Lion.Proto {
     /// <summary>Field number for the "praise" field.</summary>
     public const int PraiseFieldNumber = 7;
     private int praise_;
+    /// <summary>
+    /// 点赞，好感度
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Praise {
       get { return praise_; }
@@ -380,6 +415,9 @@ namespace Lion.Proto {
     /// <summary>Field number for the "user_id" field.</summary>
     public const int UserIdFieldNumber = 1;
     private long userId_;
+    /// <summary>
+    /// 玩家id
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long UserId {
       get { return userId_; }
@@ -391,6 +429,9 @@ namespace Lion.Proto {
     /// <summary>Field number for the "total_win" field.</summary>
     public const int TotalWinFieldNumber = 2;
     private long totalWin_;
+    /// <summary>
+    /// 总赢取金币
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long TotalWin {
       get { return totalWin_; }
@@ -402,6 +443,9 @@ namespace Lion.Proto {
     /// <summary>Field number for the "biggest_win" field.</summary>
     public const int BiggestWinFieldNumber = 3;
     private long biggestWin_;
+    /// <summary>
+    /// 最多一次赢取金币
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long BiggestWin {
       get { return biggestWin_; }
@@ -413,6 +457,9 @@ namespace Lion.Proto {
     /// <summary>Field number for the "win_spins" field.</summary>
     public const int WinSpinsFieldNumber = 4;
     private long winSpins_;
+    /// <summary>
+    /// 转老虎机赢得次数
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long WinSpins {
       get { return winSpins_; }
@@ -424,6 +471,9 @@ namespace Lion.Proto {
     /// <summary>Field number for the "total_spins" field.</summary>
     public const int TotalSpinsFieldNumber = 5;
     private long totalSpins_;
+    /// <summary>
+    /// 转老虎机总次数
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long TotalSpins {
       get { return totalSpins_; }
@@ -572,6 +622,957 @@ namespace Lion.Proto {
           }
           case 40: {
             TotalSpins = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class FriendSummary : pb::IMessage<FriendSummary> {
+    private static readonly pb::MessageParser<FriendSummary> _parser = new pb::MessageParser<FriendSummary>(() => new FriendSummary());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<FriendSummary> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Lion.Proto.LionReflection.Descriptor.MessageTypes[2]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public FriendSummary() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public FriendSummary(FriendSummary other) : this() {
+      userId_ = other.userId_;
+      name_ = other.name_;
+      headImgUrl_ = other.headImgUrl_;
+      level_ = other.level_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public FriendSummary Clone() {
+      return new FriendSummary(this);
+    }
+
+    /// <summary>Field number for the "user_id" field.</summary>
+    public const int UserIdFieldNumber = 1;
+    private long userId_;
+    /// <summary>
+    /// 玩家id
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long UserId {
+      get { return userId_; }
+      set {
+        userId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "name" field.</summary>
+    public const int NameFieldNumber = 2;
+    private string name_ = "";
+    /// <summary>
+    /// 玩家昵称
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Name {
+      get { return name_; }
+      set {
+        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "head_img_url" field.</summary>
+    public const int HeadImgUrlFieldNumber = 3;
+    private string headImgUrl_ = "";
+    /// <summary>
+    /// 头像
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string HeadImgUrl {
+      get { return headImgUrl_; }
+      set {
+        headImgUrl_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "level" field.</summary>
+    public const int LevelFieldNumber = 4;
+    private int level_;
+    /// <summary>
+    /// 等级
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Level {
+      get { return level_; }
+      set {
+        level_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as FriendSummary);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(FriendSummary other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (UserId != other.UserId) return false;
+      if (Name != other.Name) return false;
+      if (HeadImgUrl != other.HeadImgUrl) return false;
+      if (Level != other.Level) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (UserId != 0L) hash ^= UserId.GetHashCode();
+      if (Name.Length != 0) hash ^= Name.GetHashCode();
+      if (HeadImgUrl.Length != 0) hash ^= HeadImgUrl.GetHashCode();
+      if (Level != 0) hash ^= Level.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (UserId != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(UserId);
+      }
+      if (Name.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(Name);
+      }
+      if (HeadImgUrl.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(HeadImgUrl);
+      }
+      if (Level != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Level);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (UserId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(UserId);
+      }
+      if (Name.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
+      }
+      if (HeadImgUrl.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(HeadImgUrl);
+      }
+      if (Level != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Level);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(FriendSummary other) {
+      if (other == null) {
+        return;
+      }
+      if (other.UserId != 0L) {
+        UserId = other.UserId;
+      }
+      if (other.Name.Length != 0) {
+        Name = other.Name;
+      }
+      if (other.HeadImgUrl.Length != 0) {
+        HeadImgUrl = other.HeadImgUrl;
+      }
+      if (other.Level != 0) {
+        Level = other.Level;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            UserId = input.ReadInt64();
+            break;
+          }
+          case 18: {
+            Name = input.ReadString();
+            break;
+          }
+          case 26: {
+            HeadImgUrl = input.ReadString();
+            break;
+          }
+          case 32: {
+            Level = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class FriendSummaryList : pb::IMessage<FriendSummaryList> {
+    private static readonly pb::MessageParser<FriendSummaryList> _parser = new pb::MessageParser<FriendSummaryList>(() => new FriendSummaryList());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<FriendSummaryList> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Lion.Proto.LionReflection.Descriptor.MessageTypes[3]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public FriendSummaryList() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public FriendSummaryList(FriendSummaryList other) : this() {
+      data_ = other.data_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public FriendSummaryList Clone() {
+      return new FriendSummaryList(this);
+    }
+
+    /// <summary>Field number for the "data" field.</summary>
+    public const int DataFieldNumber = 1;
+    private static readonly pb::FieldCodec<global::Lion.Proto.FriendSummary> _repeated_data_codec
+        = pb::FieldCodec.ForMessage(10, global::Lion.Proto.FriendSummary.Parser);
+    private readonly pbc::RepeatedField<global::Lion.Proto.FriendSummary> data_ = new pbc::RepeatedField<global::Lion.Proto.FriendSummary>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Lion.Proto.FriendSummary> Data {
+      get { return data_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as FriendSummaryList);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(FriendSummaryList other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!data_.Equals(other.data_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= data_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      data_.WriteTo(output, _repeated_data_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      size += data_.CalculateSize(_repeated_data_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(FriendSummaryList other) {
+      if (other == null) {
+        return;
+      }
+      data_.Add(other.data_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            data_.AddEntriesFrom(input, _repeated_data_codec);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class BonusResp : pb::IMessage<BonusResp> {
+    private static readonly pb::MessageParser<BonusResp> _parser = new pb::MessageParser<BonusResp>(() => new BonusResp());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<BonusResp> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Lion.Proto.LionReflection.Descriptor.MessageTypes[4]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public BonusResp() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public BonusResp(BonusResp other) : this() {
+      bonusGold_ = other.bonusGold_;
+      gold_ = other.gold_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public BonusResp Clone() {
+      return new BonusResp(this);
+    }
+
+    /// <summary>Field number for the "bonus_gold" field.</summary>
+    public const int BonusGoldFieldNumber = 1;
+    private long bonusGold_;
+    /// <summary>
+    /// 奖励金币
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long BonusGold {
+      get { return bonusGold_; }
+      set {
+        bonusGold_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "gold" field.</summary>
+    public const int GoldFieldNumber = 2;
+    private long gold_;
+    /// <summary>
+    /// 总金币
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long Gold {
+      get { return gold_; }
+      set {
+        gold_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as BonusResp);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(BonusResp other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (BonusGold != other.BonusGold) return false;
+      if (Gold != other.Gold) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (BonusGold != 0L) hash ^= BonusGold.GetHashCode();
+      if (Gold != 0L) hash ^= Gold.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (BonusGold != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(BonusGold);
+      }
+      if (Gold != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(Gold);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (BonusGold != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(BonusGold);
+      }
+      if (Gold != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(Gold);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(BonusResp other) {
+      if (other == null) {
+        return;
+      }
+      if (other.BonusGold != 0L) {
+        BonusGold = other.BonusGold;
+      }
+      if (other.Gold != 0L) {
+        Gold = other.Gold;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            BonusGold = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            Gold = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class ShopItem : pb::IMessage<ShopItem> {
+    private static readonly pb::MessageParser<ShopItem> _parser = new pb::MessageParser<ShopItem>(() => new ShopItem());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<ShopItem> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Lion.Proto.LionReflection.Descriptor.MessageTypes[5]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ShopItem() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ShopItem(ShopItem other) : this() {
+      itemId_ = other.itemId_;
+      itemUrl_ = other.itemUrl_;
+      itemDesc_ = other.itemDesc_;
+      price_ = other.price_;
+      oldPrice_ = other.oldPrice_;
+      expire_ = other.expire_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ShopItem Clone() {
+      return new ShopItem(this);
+    }
+
+    /// <summary>Field number for the "item_id" field.</summary>
+    public const int ItemIdFieldNumber = 1;
+    private int itemId_;
+    /// <summary>
+    /// 物品id
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int ItemId {
+      get { return itemId_; }
+      set {
+        itemId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "item_url" field.</summary>
+    public const int ItemUrlFieldNumber = 2;
+    private string itemUrl_ = "";
+    /// <summary>
+    /// 物品图片url
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string ItemUrl {
+      get { return itemUrl_; }
+      set {
+        itemUrl_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "item_desc" field.</summary>
+    public const int ItemDescFieldNumber = 3;
+    private string itemDesc_ = "";
+    /// <summary>
+    /// 物品描述
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string ItemDesc {
+      get { return itemDesc_; }
+      set {
+        itemDesc_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "price" field.</summary>
+    public const int PriceFieldNumber = 4;
+    private double price_;
+    /// <summary>
+    /// 当前价格
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public double Price {
+      get { return price_; }
+      set {
+        price_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "oldPrice" field.</summary>
+    public const int OldPriceFieldNumber = 5;
+    private double oldPrice_;
+    /// <summary>
+    /// 之前价格
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public double OldPrice {
+      get { return oldPrice_; }
+      set {
+        oldPrice_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "expire" field.</summary>
+    public const int ExpireFieldNumber = 6;
+    private long expire_;
+    /// <summary>
+    /// 还有多久过期，时间长度毫秒
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long Expire {
+      get { return expire_; }
+      set {
+        expire_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as ShopItem);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(ShopItem other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (ItemId != other.ItemId) return false;
+      if (ItemUrl != other.ItemUrl) return false;
+      if (ItemDesc != other.ItemDesc) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Price, other.Price)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(OldPrice, other.OldPrice)) return false;
+      if (Expire != other.Expire) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (ItemId != 0) hash ^= ItemId.GetHashCode();
+      if (ItemUrl.Length != 0) hash ^= ItemUrl.GetHashCode();
+      if (ItemDesc.Length != 0) hash ^= ItemDesc.GetHashCode();
+      if (Price != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Price);
+      if (OldPrice != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(OldPrice);
+      if (Expire != 0L) hash ^= Expire.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (ItemId != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(ItemId);
+      }
+      if (ItemUrl.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(ItemUrl);
+      }
+      if (ItemDesc.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(ItemDesc);
+      }
+      if (Price != 0D) {
+        output.WriteRawTag(33);
+        output.WriteDouble(Price);
+      }
+      if (OldPrice != 0D) {
+        output.WriteRawTag(41);
+        output.WriteDouble(OldPrice);
+      }
+      if (Expire != 0L) {
+        output.WriteRawTag(48);
+        output.WriteInt64(Expire);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (ItemId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ItemId);
+      }
+      if (ItemUrl.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ItemUrl);
+      }
+      if (ItemDesc.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ItemDesc);
+      }
+      if (Price != 0D) {
+        size += 1 + 8;
+      }
+      if (OldPrice != 0D) {
+        size += 1 + 8;
+      }
+      if (Expire != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(Expire);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(ShopItem other) {
+      if (other == null) {
+        return;
+      }
+      if (other.ItemId != 0) {
+        ItemId = other.ItemId;
+      }
+      if (other.ItemUrl.Length != 0) {
+        ItemUrl = other.ItemUrl;
+      }
+      if (other.ItemDesc.Length != 0) {
+        ItemDesc = other.ItemDesc;
+      }
+      if (other.Price != 0D) {
+        Price = other.Price;
+      }
+      if (other.OldPrice != 0D) {
+        OldPrice = other.OldPrice;
+      }
+      if (other.Expire != 0L) {
+        Expire = other.Expire;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            ItemId = input.ReadInt32();
+            break;
+          }
+          case 18: {
+            ItemUrl = input.ReadString();
+            break;
+          }
+          case 26: {
+            ItemDesc = input.ReadString();
+            break;
+          }
+          case 33: {
+            Price = input.ReadDouble();
+            break;
+          }
+          case 41: {
+            OldPrice = input.ReadDouble();
+            break;
+          }
+          case 48: {
+            Expire = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class ShopList : pb::IMessage<ShopList> {
+    private static readonly pb::MessageParser<ShopList> _parser = new pb::MessageParser<ShopList>(() => new ShopList());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<ShopList> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Lion.Proto.LionReflection.Descriptor.MessageTypes[6]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ShopList() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ShopList(ShopList other) : this() {
+      shopName_ = other.shopName_;
+      data_ = other.data_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ShopList Clone() {
+      return new ShopList(this);
+    }
+
+    /// <summary>Field number for the "shop_name" field.</summary>
+    public const int ShopNameFieldNumber = 1;
+    private string shopName_ = "";
+    /// <summary>
+    /// 商店名称
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string ShopName {
+      get { return shopName_; }
+      set {
+        shopName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "data" field.</summary>
+    public const int DataFieldNumber = 2;
+    private static readonly pb::FieldCodec<global::Lion.Proto.ShopItem> _repeated_data_codec
+        = pb::FieldCodec.ForMessage(18, global::Lion.Proto.ShopItem.Parser);
+    private readonly pbc::RepeatedField<global::Lion.Proto.ShopItem> data_ = new pbc::RepeatedField<global::Lion.Proto.ShopItem>();
+    /// <summary>
+    /// 商店货架商品
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Lion.Proto.ShopItem> Data {
+      get { return data_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as ShopList);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(ShopList other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (ShopName != other.ShopName) return false;
+      if(!data_.Equals(other.data_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (ShopName.Length != 0) hash ^= ShopName.GetHashCode();
+      hash ^= data_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (ShopName.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(ShopName);
+      }
+      data_.WriteTo(output, _repeated_data_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (ShopName.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ShopName);
+      }
+      size += data_.CalculateSize(_repeated_data_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(ShopList other) {
+      if (other == null) {
+        return;
+      }
+      if (other.ShopName.Length != 0) {
+        ShopName = other.ShopName;
+      }
+      data_.Add(other.data_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            ShopName = input.ReadString();
+            break;
+          }
+          case 18: {
+            data_.AddEntriesFrom(input, _repeated_data_codec);
             break;
           }
         }

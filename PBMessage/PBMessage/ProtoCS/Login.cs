@@ -1209,6 +1209,9 @@ namespace Login.Proto {
     /// <summary>Field number for the "version" field.</summary>
     public const int VersionFieldNumber = 1;
     private int version_;
+    /// <summary>
+    /// 消息版本号
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Version {
       get { return version_; }
@@ -1220,6 +1223,9 @@ namespace Login.Proto {
     /// <summary>Field number for the "svc" field.</summary>
     public const int SvcFieldNumber = 2;
     private int svc_;
+    /// <summary>
+    /// 主服务号（区分不同的玩法）
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Svc {
       get { return svc_; }
@@ -1231,6 +1237,9 @@ namespace Login.Proto {
     /// <summary>Field number for the "sub_svc" field.</summary>
     public const int SubSvcFieldNumber = 3;
     private int subSvc_;
+    /// <summary>
+    /// 子服务号（区分同一玩法不同的场，例如初级、中级、高级）
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int SubSvc {
       get { return subSvc_; }
@@ -1244,6 +1253,9 @@ namespace Login.Proto {
     private static readonly pb::FieldCodec<string> _repeated_args_codec
         = pb::FieldCodec.ForString(34);
     private readonly pbc::RepeatedField<string> args_ = new pbc::RepeatedField<string>();
+    /// <summary>
+    /// 其它参数，根据版本号确认参数含义
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::RepeatedField<string> Args {
       get { return args_; }
@@ -1252,6 +1264,9 @@ namespace Login.Proto {
     /// <summary>Field number for the "user_id" field.</summary>
     public const int UserIdFieldNumber = 5;
     private long userId_;
+    /// <summary>
+    /// 玩家id
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long UserId {
       get { return userId_; }
@@ -1446,6 +1461,9 @@ namespace Login.Proto {
     /// <summary>Field number for the "version" field.</summary>
     public const int VersionFieldNumber = 1;
     private int version_;
+    /// <summary>
+    /// 消息版本号
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Version {
       get { return version_; }
@@ -1457,6 +1475,9 @@ namespace Login.Proto {
     /// <summary>Field number for the "svc" field.</summary>
     public const int SvcFieldNumber = 2;
     private int svc_;
+    /// <summary>
+    /// 主服务号（区分不同的玩法）
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Svc {
       get { return svc_; }
@@ -1468,6 +1489,9 @@ namespace Login.Proto {
     /// <summary>Field number for the "sub_svc" field.</summary>
     public const int SubSvcFieldNumber = 3;
     private int subSvc_;
+    /// <summary>
+    /// 子服务号（区分同一玩法不同的场，例如初级、中级、高级）
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int SubSvc {
       get { return subSvc_; }
@@ -1481,6 +1505,9 @@ namespace Login.Proto {
     private static readonly pb::FieldCodec<string> _repeated_args_codec
         = pb::FieldCodec.ForString(34);
     private readonly pbc::RepeatedField<string> args_ = new pbc::RepeatedField<string>();
+    /// <summary>
+    /// 其它参数，根据版本号确认参数含义
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::RepeatedField<string> Args {
       get { return args_; }
@@ -1489,6 +1516,9 @@ namespace Login.Proto {
     /// <summary>Field number for the "domain" field.</summary>
     public const int DomainFieldNumber = 5;
     private string domain_ = "";
+    /// <summary>
+    /// 域名或ip
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string Domain {
       get { return domain_; }
@@ -1500,6 +1530,9 @@ namespace Login.Proto {
     /// <summary>Field number for the "port" field.</summary>
     public const int PortFieldNumber = 6;
     private int port_;
+    /// <summary>
+    /// 端口
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Port {
       get { return port_; }
@@ -1511,6 +1544,9 @@ namespace Login.Proto {
     /// <summary>Field number for the "user_id" field.</summary>
     public const int UserIdFieldNumber = 7;
     private long userId_;
+    /// <summary>
+    /// 玩家id
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long UserId {
       get { return userId_; }
@@ -1522,6 +1558,9 @@ namespace Login.Proto {
     /// <summary>Field number for the "key" field.</summary>
     public const int KeyFieldNumber = 8;
     private long key_;
+    /// <summary>
+    /// 登陆key
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long Key {
       get { return key_; }
@@ -1533,6 +1572,9 @@ namespace Login.Proto {
     /// <summary>Field number for the "code" field.</summary>
     public const int CodeFieldNumber = 9;
     private int code_;
+    /// <summary>
+    /// 状态码
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Code {
       get { return code_; }
