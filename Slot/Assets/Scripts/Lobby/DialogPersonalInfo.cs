@@ -95,7 +95,7 @@ public class DialogPersonalInfo : DialogBase
         dlg.DoShow(obj, str);
         dlg.UpdateUserInfo(); // 默认第一个页面
     }
-    public static DialogPersonalInfo instance()
+    public static DialogPersonalInfo GetInstance()
     {
         GameObject canvas = GameObject.Find("Canvas");
         GameObject obj = canvas.transform.Find(DialogName).gameObject;
@@ -221,6 +221,11 @@ public class DialogPersonalInfo : DialogBase
         Reception recp = GameObject.Find("Reception").GetComponent<Reception>();
         recp.RemoveFriend(m_userInfo.UserId, AfterModifyFriend);
     }
+    void UpdateAvatar()
+    {
+        Reception recp = GameObject.Find("Reception").GetComponent<Reception>();
+        recp.UpdateProfileHeadImgUrl(DialogSelectAvatar.GetInstance().HeadIndex.ToString());
+    }
     void OnClick(GameObject sender)
     {
         Debug.Log(sender.name);
@@ -271,7 +276,8 @@ public class DialogPersonalInfo : DialogBase
             case DialogBtn.UpAvatar:
             case DialogBtn.UploadAvatar:
                 {
-                    Debug.Log("Upload...");
+                    //Debug.Log("Upload...");
+                    DialogSelectAvatar.Show(UpdateAvatar);
                 }
                 break;
             case DialogBtn.AddFriend:

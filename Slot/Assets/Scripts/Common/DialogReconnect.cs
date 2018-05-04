@@ -15,6 +15,17 @@ public class DialogReconnect : MonoBehaviour {
     public static void Show()
     {
         GameObject canvas = GameObject.Find("Canvas");
+        if (canvas == null)
+        {
+            Debug.Log("canvas == null");
+            return;
+        }
+        Transform tf = canvas.transform.Find("DialogReconnect");
+        if (tf == null)
+        {
+            Debug.Log("tf == null");
+            return;
+        }
         GameObject obj = canvas.transform.Find("DialogReconnect").gameObject;
         DialogReconnect dlg = obj.GetComponent<DialogReconnect>();
         dlg.DoShow(obj);        
@@ -22,6 +33,17 @@ public class DialogReconnect : MonoBehaviour {
     public static void Hide()
     {
         GameObject canvas = GameObject.Find("Canvas");
+        if (canvas == null)
+        {
+            Debug.Log("canvas == null");
+            return;
+        }
+        Transform tf = canvas.transform.Find("DialogReconnect");
+        if (tf == null)
+        {
+            Debug.Log("tf == null");
+            return;
+        }
         GameObject obj = canvas.transform.Find("DialogReconnect").gameObject;
         DialogReconnect dlg = obj.GetComponent<DialogReconnect>();
         dlg.DoHide(obj);   

@@ -81,9 +81,9 @@ public class DialogDailyBonus : DialogBase
                 }
                 break;
             case DialogBtn.Collect:
-                {
-                    //Reception recp = GameObject.Find("Reception").GetComponent<Reception>();
-                    //recp.TakeLoginBonus();
+                {                  
+                    Reception recp = GameObject.Find("Reception").GetComponent<Reception>();
+                    recp.TakeLoginBonus();
                 }
                 break;
             default:
@@ -103,9 +103,9 @@ public class DialogDailyBonus : DialogBase
         }
 
         // 再显示
-        if (m_day > 0 && m_day < 8)
+        if (m_day >= 0 && m_day < 7)
         {
-            string goName = "Day" + m_day.ToString();
+            string goName = "Day" + (m_day + 1).ToString();
             dailyEdgesObj.transform.Find(goName).gameObject.SetActive(true);
         }
         else

@@ -136,12 +136,20 @@ public class SlotDisplays : MonoBehaviour
                 }
                 break;           
             case Constants.Reconnect:
-                {
-                    ProtoNet.WriteLog("Reconnecting...");
-                    if (packet.msgId > 0)
+                {                    
+                    if (packet.msgId == 1)
                     {
+                        ProtoNet.WriteLog("Reconnecting...");
                         // 3s后Display中重连
                         m_clerk.Net.CheckReconnect(3);
+                    }
+                    else if (packet.msgId == 2)
+                    {
+                        ProtoNet.WriteLog("Reconnecting successfully.");
+                    }
+                    else
+                    {
+                        ProtoNet.WriteLog("Reconnecting successfully:" + packet.msgId);
                     }
                 }
                 break;

@@ -20,6 +20,18 @@ public class Lobby{
     private LongArray m_friendArray;
     private int m_curFriendPage = 0; // base 0
     private FriendSummaryList m_curSummaryList;
+    private long m_freeBonusEpoch = -1;
+    private UserItemList m_userItemList;
+    public UserItemList UserItemList
+    {
+        get { return m_userItemList; }
+        set { m_userItemList = value; }
+    }
+    public long FreeBonusEpoch
+    {
+        get { return m_freeBonusEpoch; }
+        set { m_freeBonusEpoch = value; }
+    }
     public FriendSummaryList CurrentSummaryList
     {
         get { return m_curSummaryList; }

@@ -92,9 +92,13 @@ public class SlotClerk : MonoBehaviour {
     //    yield return new WaitForSeconds(1);
     //    m_escapeTimes = 1;
     //}
+    void QuitGame()
+    {
+        Application.Quit();
+    }
 	// Update is called once per frame
 	void Update () {
-        if (Input.GetKey(KeyCode.Escape))
+        if (Input.GetKeyUp(KeyCode.Escape))
         {
             //这个地方可以写“再按一次退出”的提示
             if (DialogBase.Actived())
@@ -105,7 +109,7 @@ public class SlotClerk : MonoBehaviour {
             else
             {
                 Debug.Log("Show in Clerk");
-                DialogBase.Show("ESC", "Exit game?");
+                DialogBase.Show("ESC", "Exit game?", QuitGame);
             }
             //m_escapeTimes++;
             //StartCoroutine("resetTimes");

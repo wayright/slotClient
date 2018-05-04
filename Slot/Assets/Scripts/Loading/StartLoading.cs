@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Dog.Proto;
 using Login.Proto;
+using System.Threading.Tasks;
 
 // 启动加载
 public class StartLoading : MonoBehaviour {
@@ -26,16 +27,11 @@ public class StartLoading : MonoBehaviour {
         m_net.Add(Constants.Dog_Login, LoginResp.Parser);
         m_net.Add(Constants.Dog_Redirect, RedirectResp.Parser);
         m_net.Name = "Door";
+        m_net.Init("182.92.74.240", 7900);
 
-        // 启动登录
-        if (false == m_net.Init("182.92.74.240", 7900))
-        {
-            // 这里不重连，在发送请求失败后再重连
-            Debug.Log("Door:Client init failed!");
-        }
-
-        WorkDone callBack = new WorkDone(Redirect);
-        Login(callBack);
+        GameObject.Find("RcText").GetComponent<Text>().text = "Loading...";
+        //string myUID = SystemInfo.deviceUniqueIdentifier;
+        //DialogBase.Show("UID", myUID);
 	}
     void Redirect()
     {
@@ -75,12 +71,15 @@ public class StartLoading : MonoBehaviour {
             return;
         }
 
-        if (m_net.CheckReconnect())
-        {
-            CheckLogin();
+        // Step
+        m_net.CheckReconnect();
+        //if (m_net.CheckReconnect())
+        //{
+            //Debug.Log("Door:Reconnect successful.");
+            //CheckLogin();
 
-            DialogReconnect.Hide();
-        }
+            //DialogBase.Hide();
+        //}
 
         ProtoPacket packet = new ProtoPacket();
         if (m_net.RecvTryDequeue(ref packet))
@@ -121,13 +120,23 @@ public class StartLoading : MonoBehaviour {
                     break;
                 case Constants.Reconnect:
                     {
-                        // 展示重连对话框，直到重连成功
-                        ProtoNet.WriteLog("Door:Reconnecting...");
-                        if (packet.msgId > 0)
+                        // 展示重连对话框，直到重连成功                        
+                        if (packet.msgId == 1)
                         {
+                            ProtoNet.WriteLog("Door:Reconnecting...");
                             // 3s后Display中重连
                             m_net.CheckReconnect(3);
-                            DialogReconnect.Show();
+                            //DialogBase.Show("RECONNECT", "reconnecting");
+                            GameObject.Find("RcText").GetComponent<Text>().text = "Reconnecting...";
+                            m_net.Ip = "182.92.74.240";
+                        }
+                        else if (packet.msgId == 2)
+                        {
+                            Debug.Log("Door:Reconnect successful.");
+                            //DialogBase.Hide();
+                            GameObject.Find("RcText").GetComponent<Text>().text = "Connect successfully.";
+                            WorkDone callBack = new WorkDone(Redirect);
+                            Login(callBack);                            
                         }
                     }
                     break;
@@ -150,7 +159,7 @@ public class StartLoading : MonoBehaviour {
     {
         async = SceneManager.LoadSceneAsync(startScene);
         yield return async;
-        
+
         int displayProgress = 0;
         int toProgress = 0;
         AsyncOperation op = SceneManager.LoadSceneAsync(startScene);
@@ -161,6 +170,7 @@ public class StartLoading : MonoBehaviour {
             while (displayProgress < toProgress)
             {
                 ++displayProgress;
+                GameObject.Find("RcText").GetComponent<Text>().text = "Loading..." + displayProgress.ToString() + "%";
                 Debug.Log("Door:Progress:" + displayProgress);
                 //SetLoadingPercentage(displayProgress);
                 yield return new WaitForEndOfFrame();
@@ -171,6 +181,7 @@ public class StartLoading : MonoBehaviour {
         while (displayProgress < toProgress)
         {
             ++displayProgress;
+            GameObject.Find("RcText").GetComponent<Text>().text = "Loading..." + displayProgress.ToString() + "%";
             //SetLoadingPercentage(displayProgress);
             Debug.Log("Door:Progress:" + displayProgress);
             yield return new WaitForEndOfFrame();

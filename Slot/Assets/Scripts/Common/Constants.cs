@@ -24,6 +24,14 @@ public class Constants{
     public const int Lion_TakeLoginBonus = 4202; // 领取连续登录奖励
     public const int Lion_NotifyFreeBonus = 4203; // 后端推送，倒计时的时间点，如果当前时间已经超过，直接显示奖励
     public const int Lion_TakeFreeBonus = 4204; // 领取免费奖励
+    public const int Lion_GetItems = 4110; // 获取背包数据
+    public const int Lion_SellItem = 4112; // 出售道具
+    public const int Lion_GiveItem = 4113; // 赠送道具
+    public const int Lion_DropItem = 4114; // 丢弃道具
+    public const int Lion_UseItem = 4115; // 使用道具
+    public const int Lion_JoinItem = 4116; // 合成道具
+    public const int Lion_GetShopItems = 4130; // 获取商店物品列表
+    public const int Lion_BuyItem = 4131; // 购买物品
     
     // Slot-Tiger
     public const int Tiger_QuickLoginInfo = 10000; // Tiger快速登录
@@ -120,6 +128,7 @@ public class Constants{
         Audio_ReelStop,
         Audio_CoinFly,
         Audio_PlusMinus,
+        Audio_LobbyClickButton,
         Audio_Max,
     }
 
@@ -133,7 +142,8 @@ public class Constants{
         "AutoSpin",
         "ReelStop",
         "CoinFly",
-        "PlusMinus"
+        "PlusMinus",
+        "LobbyClickButton"
     };
 
     public const int Svc_Tiger = 100;
@@ -142,4 +152,8 @@ public class Constants{
     // 语言
     public const string Lang_Eng = "eng"; // 英文
     public const string Lang_CN = "cn"; // 简体中文
+
+    // 奖励类型
+    public const int Bonus_Daily = 0;
+    public const int Bonus_Free = 1;
 }

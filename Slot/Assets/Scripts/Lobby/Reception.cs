@@ -21,6 +21,7 @@ public class Reception : MonoBehaviour
     private ProtoNet m_net; // 网络-Dog&Lion
     private Dictionary<string, int> m_btnIndexDict = new Dictionary<string, int>();
     private string m_nick; // 临时昵称名
+    private string m_headImgUrl; // 临时头像url，如果数字为inddex
 
     // Use this for initialization
 	void Start () {
@@ -46,9 +47,10 @@ public class Reception : MonoBehaviour
         m_net.Add(Constants.Lion_TakeLoginBonus, LongArray.Parser);
         m_net.Add(Constants.Lion_NotifyFreeBonus, LongValue.Parser);
         m_net.Add(Constants.Lion_TakeFreeBonus, LongArray.Parser);
+        m_net.Add(Constants.Lion_GetItems, UserItemList.Parser);
         m_net.Add(-2, null);
         m_net.Add(Constants.Reconnect, null);
-        m_net.Add(Constants.Error, null);
+        m_net.Add(Constants.Error, Status.Parser);
         m_net.Name = "Reception";
 
         for (int i = 0; i < Constants.LobbyBtn_Strings.Length; ++i)
@@ -81,6 +83,9 @@ public class Reception : MonoBehaviour
 
             QuickLogin();
         }
+
+        // 刷新倒计时
+        UpdateCountDown();
 	}
     int GetBtnIndexFromName(string btnName)
     {
@@ -93,8 +98,29 @@ public class Reception : MonoBehaviour
             return -1;
         }
     }
-    void OnClick(GameObject sender)
+    void QuitGame()
     {
+        Application.Quit();
+    }
+    public void PlayAudio(Constants.Audio aud)
+    {
+        if (!GlobalVars.instance.GetSE())
+            return;
+
+        if (aud >= Constants.Audio.Audio_Max)
+        {
+            Debug.Log("Ivalid audio enum");
+            return;
+        }
+
+        string audStr = Constants.Audio_Strings[(int)aud];
+        AudioSource aSource = GameObject.Find(audStr).GetComponent<AudioSource>();
+        aSource.Play();
+    }
+    void OnClick(GameObject sender)
+    {        
+        PlayAudio(Constants.Audio.Audio_LobbyClickButton);
+
         int btnIndex = GetBtnIndexFromName(sender.name);
         if (btnIndex < 0)
         {
@@ -119,8 +145,8 @@ public class Reception : MonoBehaviour
                 }
                 break;
             case Constants.LobbyBtn.Btn_Poker:
-                {                    
-                    DialogBase.Show("POKER", "Exit game?", Application.Quit());
+                {
+                    DialogBase.Show("POKER", "Exit game?", QuitGame);
                 }
                 break;
             case Constants.LobbyBtn.Btn_Option:
@@ -160,9 +186,44 @@ public class Reception : MonoBehaviour
                     TakeFreeBonus();
                 }
                 break;
+            case Constants.LobbyBtn.Btn_MainReward: // Bag
+                {
+                    GetItems();
+                }
+                break;
+            case Constants.LobbyBtn.Btn_Bingo:
+                {
+                    UnityToAndroid("jb_1");
+                }
+                break;
             default:
                 DialogBase.Show("Button clicked", sender.name);
                 break;
+        }
+    }
+    private void UnityToAndroid(string buykey)
+    {
+        AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+        if (jc == null)
+        {
+            DialogBase.Show("ANDROID", "js is null");
+            return;
+        }
+
+        AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
+        if (jo == null)
+        {
+            DialogBase.Show("ANDROID", "jo is null");
+            return;
+        }
+        
+        try
+        {
+            jo.Call("Pay", buykey);
+        }
+        catch (System.Exception e)
+        {
+            DialogBase.Show("ANDROID", e.Message);
         }
     }
     void ShowPersonalInfoDlg()
@@ -193,6 +254,15 @@ public class Reception : MonoBehaviour
         Empty empty = new Empty();
 
         m_net.SendEnqueue(Constants.Lion_TakeFreeBonus,
+            0,
+            empty,
+            callBack);
+    }
+    public void GetItems(WorkDone callBack = null)
+    {
+        Empty empty = new Empty();
+
+        m_net.SendEnqueue(Constants.Lion_GetItems,
             0,
             empty,
             callBack);
@@ -322,6 +392,22 @@ public class Reception : MonoBehaviour
         LionUserInfo ui = Lobby.getInstance().UserInfo;
         ui.Name = m_nick;
     }
+    void AfterUpdateProfileHeadImgUrl()
+    {
+        string headStr = "Head" + m_headImgUrl;
+        GameObject goSrc =
+            DialogSelectAvatar.GetInstance().transform.Find("main").
+            transform.Find("Avatars").
+            transform.Find("GridLayeout").
+            transform.Find(headStr).gameObject;
+
+        Lobby.getInstance().UserInfo.HeadImgUrl = m_headImgUrl;
+        GameObject goDest =
+           DialogPersonalInfo.GetInstance().transform.Find("main").
+           transform.Find("BtnUpAvatar").gameObject;
+        goDest.GetComponent<Image>().sprite = goSrc.GetComponent<Image>().sprite;
+        GameObject.Find("BtnAvatar").transform.Find("BtnHead").GetComponent<Image>().sprite = goSrc.GetComponent<Image>().sprite;
+    }
     public void UpdateProfileName(string nickName)
     {
         LionUserInfo ui = Lobby.getInstance().UserInfo;
@@ -337,6 +423,18 @@ public class Reception : MonoBehaviour
             0,
             sa,
             AfterUpdateProfileName);
+    }
+    public void UpdateProfileHeadImgUrl(string headImgUrl)
+    {
+        StringArray sa = new StringArray();
+        sa.Data.Add("HeadImgUrl");
+        sa.Data.Add(headImgUrl);
+        m_headImgUrl = headImgUrl;
+
+        m_net.SendEnqueue(Constants.Lion_UpdateProfile,
+            0,
+            sa,
+            AfterUpdateProfileHeadImgUrl);
     }
     public void GetTigerStatInfo(long uId, WorkDone cb)
     {
@@ -395,7 +493,20 @@ public class Reception : MonoBehaviour
         //  Head
         if (ui.HeadImgUrl != "")
         {
-            StartCoroutine(Tools.LoadWWWImageToButton(ui.HeadImgUrl, "BtnHead"));
+            m_headImgUrl = ui.HeadImgUrl;
+            int headIndex = 0;
+            try
+            {
+                headIndex = System.Convert.ToInt32(m_headImgUrl);
+            }
+            catch(System.Exception e)
+            {
+                Debug.Log(e.Message);
+            }
+
+            if (headIndex > 0)
+                AfterUpdateProfileHeadImgUrl();
+            //StartCoroutine(Tools.LoadWWWImageToButton(ui.HeadImgUrl, "BtnHead"));
         }
     }
     public void StartCountDown(long val)
@@ -409,6 +520,29 @@ public class Reception : MonoBehaviour
         go.transform.Find("Coin").gameObject.SetActive(false);
         go.transform.Find("Text").gameObject.SetActive(true);
     }
+    public void UpdateCountDown()
+    {
+        long epoch = Lobby.getInstance().FreeBonusEpoch;
+        if (epoch < 0)
+        {
+            Debug.Log("epoch < 0");
+            return;
+        }
+
+        long curEpoch = (System.DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000;
+        if (epoch == 0 || curEpoch > epoch)
+        {
+            EndCountDown();
+        }
+        else
+        {
+
+            long msDiff = epoch - curEpoch;
+            double temp = (double)msDiff / 1000.0;
+            temp += 0.5; // 向上取整，保证时间到了
+            StartCountDown((long)temp);
+        }
+    }
     public void EndCountDown()
     {
         string btnStr = Constants.LobbyBtn_Strings[(int)Constants.LobbyBtn.Btn_FreeBonus];
@@ -420,6 +554,13 @@ public class Reception : MonoBehaviour
         go.GetComponent<Button>().interactable = true;
         go.transform.Find("Text").gameObject.SetActive(false);
         go.transform.Find("Coin").gameObject.SetActive(true);
+
+        ExplodeCoin.Show(Constants.Bonus_Free);
+    }
+    public void FlyCoin(int type)
+    {
+        GameObject go = GameObject.Find("BtnCredits");
+        ExplodeCoin.MoveTo(type, go.transform.position);
     }
 	// Update is called once per frame
 	void Update () {
@@ -433,7 +574,7 @@ public class Reception : MonoBehaviour
             else
             {
                 Debug.Log("Show");
-                DialogBase.Show("ESC", "Are you sure to exit game?");
+                DialogBase.Show("ESC", "Are you sure to exit game?", QuitGame);
             }
         }
 
@@ -565,43 +706,72 @@ public class Reception : MonoBehaviour
                 case Constants.Lion_NotifyWeeklyLogin:
                     {
                         // 连续登录奖励
+                        // NotifyWeeklyLogin 返回的intvalue是0-6，0表示今天登陆了（昨天没登录）
                         IntValue iv = (IntValue)packet.proto;
                         DialogDailyBonus.Show(iv.Value);
+
+                        ExplodeCoin.Show();
                     }
                     break;
                 case Constants.Lion_TakeLoginBonus:
                     {
                         LongArray la = (LongArray)packet.proto;
-                        Debug.Log("Take login bonus!");
+                        // la[0] 奖励金币数
+                        // la[1] 最终总数
+                        if (la.Data.Count >= 2)
+                        {
+                            Lobby.getInstance().UserInfo.Gold = la.Data[1];
+                            // 若有动画，在此添加
+                            FlyCoin(Constants.Bonus_Daily);
+                            UpdateUserInfoUI();
+                        }
                     }
                     break;
                 case Constants.Lion_NotifyFreeBonus:
                     {
+                        // 第一次登陆的时候，数据库里面没有数据，所以返回0
+                        // 后端推送，倒计时剩余时间长度（毫秒），如果小于等于0，直接显示奖励
                         // 免费奖励
-                        LongValue lv = (LongValue)packet.proto;                              
-                        if (lv.Value == 0)
-                        {
-                            EndCountDown();
-                        }
-                        else
-                        {
-                            Debug.Log("Lion_NotifyFreeBonus:" + lv.Value);
-                            StartCountDown(5);
-                        }
+                        LongValue lv = (LongValue)packet.proto;
+                        long curEpoch = (System.DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000;
+                        Lobby.getInstance().FreeBonusEpoch = curEpoch + lv.Value;
+
+                        UpdateCountDown();
                     }
                     break;
                 case Constants.Lion_TakeFreeBonus:
                     {
                         LongArray la = (LongArray)packet.proto;
-                        Debug.Log("Take free bonus!");
+                        if (la.Data.Count >= 2)
+                        {
+                            Lobby.getInstance().UserInfo.Gold = la.Data[1];
+                            // 若有动画，在此添加
+                            FlyCoin(Constants.Bonus_Free);
+                            UpdateUserInfoUI();
+                        }
+                    }
+                    break;
+                case Constants.Lion_GetItems:
+                    {
+                        //
+                        Lobby.getInstance().UserItemList = (UserItemList)packet.proto;                       
+
+                        if (packet.callback != null)
+                        {
+                            packet.callback();
+                        }
+                        else
+                        {
+                            DialogBag.Show(null);
+                        }
                     }
                     break;
                 case Constants.Reconnect:
                     {
-                        // 展示重连对话框，直到重连成功
-                        ProtoNet.WriteLog("Reconnecting...");
-                        if (packet.msgId > 0)
+                        // 展示重连对话框，直到重连成功                        
+                        if (packet.msgId == 1)
                         {
+                            ProtoNet.WriteLog("Reconnecting...");
                             // 3s后Display中重连
                             m_net.CheckReconnect(3);
                             DialogReconnect.Show();
@@ -611,6 +781,9 @@ public class Reception : MonoBehaviour
                 case Constants.Error:
                     {
                         // 展示错误
+                        Status stat = (Status)packet.proto;
+                        string err = "Error:" + stat.Code.ToString() + "-" + stat.Desc;
+                        DialogBase.Show("ERROR", err);
                     }
                     break;
                 default:

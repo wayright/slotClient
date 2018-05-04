@@ -61,6 +61,11 @@ public class ProtoNet
         get { return m_name; }
         set { m_name = value; }
     }
+    public string Ip
+    {
+        get { return m_ip; }
+        set { m_ip = value; }
+    }
 
     /// <summary>  
     /// 添加支持的序列化类型
@@ -130,17 +135,27 @@ public class ProtoNet
         m_recvQueue = new ConcurrentQueue<ProtoPacket>();
         m_sendQueue = new ConcurrentQueue<ProtoPacket>();
 
-        if (!ConnectServer())
+        Task taskConnect = Task.Factory.StartNew(() =>
         {
-            // 重连展示
-            AddReconnect();
+            if (!ConnectServer())
+            {
+                // 重连展示
+                AddReconnect();
 
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+                return false;
+            }
+            else
+            {
+                ProtoPacket reconnectPacket = new ProtoPacket();
+                reconnectPacket.cmdId = Constants.Reconnect;
+                reconnectPacket.msgId = 2; // 重连成功
+                m_recvQueue.Enqueue(reconnectPacket);
+
+                return true;
+            }
+        });
+
+        return true;
     }
     /// <summary>  
     ///连接服务器  
