@@ -6,7 +6,7 @@ option java_package = "studio.first.proto.dog";
 option java_outer_classname = "DogProto";
 
 message LoginReq {
-    int32 version = 1;
+    int32 version = 1; // 1=游客登录 2=邮箱密码登录
     repeated string args = 2;
 }
 
