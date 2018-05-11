@@ -34,24 +34,23 @@ import android.content.SharedPreferences.Editor;
 
 public class UnityPlayerActivity extends Activity
 {
-    protected UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
-
-	//The helper object
+	// don't change the name of this variable; referenced from native code
+    protected UnityPlayer mUnityPlayer; 
+	// The helper object
     IabHelper mHelper;
     // Debug tag, for logging
-    static final String TAG ="first.studio.slot";
-	// Does the user have the premium upgrade?
-	boolean mIsPremium = false;
-    // Does the user have an activesubscription to the infinite gas plan?
-    boolean mSubscribedToInfiniteGas = false;
-    // SKUs for our products: the premiumupgrade (non-consumable) and gas (consumable)
-    static String SKU_consume ="";
-    static String SKU_noconsume ="";
-    //static final String SKU_GAS="";
-    //SKU for our subscription (infinite gas)
-    //static final String SKU_INFINITE_GAS ="infinite_gas";
+    static final String TAG = "FirstStudio.sloter";
+    // UID
+    static final String PREF_UNIQUE_ID = "PREF_UNIQUE_ID";
+    // SKU prefix
+    static final String SKU_CONSUME_JB_PREFIX = "jb_";
     // (arbitrary) request code for the purchaseflow
     static final int RC_REQUEST = 10001;
+    
+    // SKUs for our products: the premiumupgrade (non-consumable) and gas (consumable)
+    static String SKU_consume = "";
+    static String UNIQUE_id = null;
+	
     // Setup activity layout
     @Override protected void onCreate (Bundle savedInstanceState)
     {
@@ -64,338 +63,65 @@ public class UnityPlayerActivity extends Activity
         setContentView(mUnityPlayer);
         mUnityPlayer.requestFocus();
         
+        LogToFile.init(this);        
         String base64EncodedPublicKey ="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhnlY+4bHOJO/7EPizRKqp3loDGq38WLAip2oa4Wtnx4AIqI6f0bK+Xm8f51EFoRSFETmDAUmVZSofzJy5IlORaQxXeyNa50nZ5JZQ8brdp4tueHem1Xo1Qdd+bm8BiSP6qU5XWSDRdlwagqUc7jr/HmVeTrLUPMTBMUz+yQVhGCS2pa8ZNn0lhl5AZ6/JVZHZx/7lAXqO9jMS7e1kjRQM721YfJjHPW/b+9bzkafPJsxqCATdrMbEsMdZ19eh0HWlNpuiRE6I6FelV2GB4VqsqhbT0pRE+AKkHZnp7NvbJ9vH2EdItqpcs3LLGaBa2Rc2hFvxLOQ6+Q4GaLo8r7pWwIDAQAB";
 		// Create the helper, passing it our contextand the public key to verify signatures with
-		Log.d(TAG, "Creating IABhelper.");
+		DebugLog(TAG, "Creating IABhelper.");
 		mHelper = new IabHelper(this, base64EncodedPublicKey);
 		// enable debug logging (for aproduction application, you should set this to false).
 		mHelper.enableDebugLogging(true);
 		
 		// Start setup. This is asynchronousand the specified listener
 		// will be called once setup completes.
-		Log.d(TAG, "Startingsetup.");
-		//complain("onCreate.");
+		DebugLog(TAG, "Startingsetup.");
 		mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() 
 		{
-			public void onIabSetupFinished(IabResult result){
-				Log.d(TAG, "Setupfinished.");
-				if (!result.isSuccess()){
+			public void onIabSetupFinished(IabResult result)
+			{
+				DebugLog(TAG, "Setupfinished.");
+				if (!result.isSuccess())
+				{
 					// Oh noes, there was a problem.
-					complain("Problemsetting up in-app billing: " + result);
-					UnityLog("Problemsetting up in-app billing: " + result);
+					complain("Problemsetting up in-app billing: " + result);					
 					return;
 				}
 				
 				// Have we been disposed of inthe meantime? If so, quit.
 				if (mHelper == null) return;
 				// IAB is fully set up. Now, let'sget an inventory of stuff we own.
-				Log.d(TAG, "Setupsuccessful. Querying inventory.");
-				//complain("Setupsuccessful. Querying inventory.");
-				try {
+				DebugLog(TAG, "Setupsuccessful. Querying inventory.");
+				try
+				{
                     mHelper.queryInventoryAsync(mGotInventoryListener);
-                } catch (IabAsyncInProgressException e) {
+                } 
+                catch (IabAsyncInProgressException e) 
+                {
                     complain("Error querying inventory. Another async operation in progress.");
-                    UnityLog("Error querying inventory. Another async operation in progress.");
                 }
 			}
 		});
-    } 
-    
-    private static String uniqueID = null;
-	private static final String PREF_UNIQUE_ID = "PREF_UNIQUE_ID";
-	public synchronized static String GetUniqueID(Context context) {
-		if (uniqueID == null) {
-			SharedPreferences sharedPrefs = context.getSharedPreferences(
-				PREF_UNIQUE_ID, Context.MODE_PRIVATE);
-			uniqueID = sharedPrefs.getString(PREF_UNIQUE_ID, null);
-			if (uniqueID == null) {
-				uniqueID = UUID.randomUUID().toString();
-				Editor editor = sharedPrefs.edit();
-				editor.putString(PREF_UNIQUE_ID, uniqueID);
-				editor.commit();
-			}
-		}
-		return uniqueID;
-	}
-	public String GetUID()
-	{
-		return GetUniqueID(getApplicationContext());
-	}
-	public void Pay(final String buykey)
-	{		
-		/* TODO: for security, generate your payloadhere for verification. See the comments on
-		*        verifyDeveloperPayload() for more info.Since this is a SAMPLE, we just use
-		*        an empty string, but on a productionapp you should carefully generate this. */
-		if(buykey.contains("jb_"))
-		{
-			UnityLog("Pay SKU_consume.");
-			SKU_consume = buykey;
-		}
-
-		//if(buykey.contains("lb_"))
-		//{
-		//	SKU_noconsume = buykey;
-		//}
-		
-		runOnUiThread(new Runnable()
-		{
-			public void run()
-			{
-				Toast.makeText(getApplicationContext(),buykey,Toast.LENGTH_SHORT).show();
-				UnityLog("Runable");
-				SendToUnityMessage(buykey);
-			}
-		});
-		
-		String payload = "";
-		try{
-			//mHelper.flagEndAsync(); // added by wdz 2018-05-10
-			mHelper.launchPurchaseFlow(this,buykey, RC_REQUEST,mPurchaseFinishedListener,payload);
-		}catch (IabAsyncInProgressException e) {
-            complain("Error launchPurchaseFlow.");
-            UnityLog("Error launchPurchaseFlow." + e.getMessage());
-        }
-	}
-	 @Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-	    Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
-		//try{
-		    // Pass on the activity result to the helper for handling
-		    if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
-		        // not handled, so handle it ourselves (here's where you'd
-		        // perform any handling of activity results not related to in-app
-		        // billing...
-		        UnityLog("handle it ourselves.");
-		        
-		        super.onActivityResult(requestCode, resultCode, data);
-		    }
-		    else {
-		        Log.d(TAG, "onActivityResult handled by IABUtil.");
-		        UnityLog("onActivityResult handled by IABUtil.");
-		    }
-//}
-	//	catch (IabAsyncInProgressException e) {
-           // complain("Error onActivityResult.");
-           // UnityLog("Error onActivityResult." + e.getMessage());
-//}
-	}
-	//Listener that's called when we finish querying the items and subscriptions weown
-	IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener()
-	{
-		public void onIabPurchaseFinished(IabResult result, Purchase purchase)
-		{
-//			complain("onIabPurchaseFinished.");
-			UnityLog("onIabPurchaseFinished.");
-			Log.d(TAG, "Purchase finished: " + result + ", purchase:" + purchase);
-			if (result.isFailure()) 
-			{
-			     complain("Error purchasing: " +result); 
-			     UnityLog("Error purchasing: " +result); 
-			     //setWaitScreen(false);
-			     return;
-			} 
-			
-			if (!verifyDeveloperPayload(purchase)) 
-			{
-				complain("Error purchasing.Authenticity verification failed."); 
-				UnityLog("Error purchasing.Authenticity verification failed.");
-				// setWaitScreen(false); 
-				return;
-			}
-			 
-			Log.d(TAG, "Purchase successful."); 
-			if (purchase.getSku().equals(SKU_consume)) 
-			{ 
-				complain("consumeAsync SKU_consume.");
-				UnityLog("consumeAsync SKU_consume.");
-				Log.d(TAG, "Purchase is gas.Starting gas consumption.");
-				try{
-					mHelper.consumeAsync(purchase,mConsumeFinishedListener); 
-				}catch (IabAsyncInProgressException e) {
-            		complain("Error consumeAsync in onIabPurchaseFinished.");
-            		UnityLog("Error consumeAsync in onIabPurchaseFinished.");
-        		}
-			}
-			else if (purchase.getSku().equals(SKU_noconsume)) 
-			{
-				Log.d(TAG, "Purchase ispremium upgrade. Congratulating user.");
-				alert("Thank you forupgrading to premium!");
-				mIsPremium = true;
-			}
-			else
-			{
-				UnityLog("unknown purchase.");
-			}
-		}
-	};
-	
-	// Listener that's called when we finishquerying the items and subscriptions we own
-	IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() 
-	{
-		public void onQueryInventoryFinished(IabResult result, Inventory inventory) 
-		{
-			complain("onQueryInventoryFinished.");
-			UnityLog("onQueryInventoryFinished.");
-			Log.d(TAG, "Query inventoryfinished.");
-			// Have we been disposed of in themeantime? If so, quit.
-			if (mHelper == null) return;
-			// Is it a failure?
-			if (result.isFailure()) 
-			{
-				complain("Failed to queryinventory: " + result);
-				UnityLog("Failed to queryinventory: " + result);
-				//return;
-			}
-			
-			String msg = "";
-			String sku_jb1 = "jb_1";
-			if (inventory.hasPurchase(sku_jb1)) {  
-				try{
-					msg += "hasPurchase";
-					complain("mHelper.consumeAsync in onQueryInventoryFinished1.");
-					UnityLog("mHelper.consumeAsync in onQueryInventoryFinished1.");
-					mHelper.consumeAsync(inventory.getPurchase(sku_jb1), mConsumeFinishedListener);
-				}catch (IabAsyncInProgressException e) {
-            		complain("Error consumeAsync1.");
-            		UnityLog("mHelper.consumeAsync in onQueryInventoryFinished1111.");            		
-				//mHelper.consumeAsync(inventory.getPurchase(SKU_consume), null);
-				//UnityLog("mHelper.consumeAsync in onQueryInventoryFinished1.");
-				}
-			}
-			else
-			{
-				complain("don have SKU_consume.");
-			}
-			Log.d(TAG, "Query inventorywas successful.");
-			/*
-			* Check for items we own. Noticethat for each purchase, we check
-			* the developer payload to see ifit's correct! See
-			* verifyDeveloperPayload().
-			*/
-			
-			// Do we have the premium upgrade?
-			Purchase premiumPurchase =inventory.getPurchase(SKU_noconsume);
-			mIsPremium = (premiumPurchase !=null && verifyDeveloperPayload(premiumPurchase));
-			Log.d(TAG, "User is " +(mIsPremium ? "PREMIUM" : "NOT PREMIUM"));
-			
-			msg += "PREMIUM";
-			if (mIsPremium == false)
-				msg += "NOT PREMIUM";
-			
-			// Check for gas delivery -- if weown gas, we should fill up the tank immediately
-			Purchase gasPurchase = inventory.getPurchase(SKU_consume);
-			if (gasPurchase != null &&verifyDeveloperPayload(gasPurchase)) 
-			{
-				Log.d(TAG, "We have gas.Consuming it.");
-				try{
-					complain("mHelper.consumeAsync in onQueryInventoryFinished2.");
-					UnityLog("mHelper.consumeAsync in onQueryInventoryFinished2.");
-					mHelper.consumeAsync(inventory.getPurchase(SKU_consume),mConsumeFinishedListener);
-				}catch (IabAsyncInProgressException e) {
-            		complain("Error consumeAsync2.");
-            		UnityLog("Error consumeAsync2.");
-        		}
-        		msg += ",consumeAsync";
-				//return;
-			}
-			else
-				complain("!gasPurchase != null &&verifyDeveloperPayload(gasPurchase).");
-			
-			alert(msg);
-			Log.d(TAG, "Initial inventoryquery finished; enabling main UI.");
-		}
-	};
-
-	//Called when consumption is complete
-	IabHelper.OnConsumeFinishedListener mConsumeFinishedListener = new IabHelper.OnConsumeFinishedListener() 
-	{
-		public void onConsumeFinished(Purchase purchase, IabResult result) 
-		{
-			//complain("onConsumeFinished.");
-			UnityLog("onConsumeFinished1.");
-			Log.d(TAG, "Consumptionfinished. Purchase: " + purchase + ", result: " + result);
-			// if we were disposed of in themeantime, quit.
-			if (mHelper == null) return;
-			
-			// We know this is the"gas" sku because it's the only one we consume,
-			// so we don't check which sku wasconsumed. If you have more than one
-			// sku, you probably shouldcheck...
-			
-			if (result.isSuccess()) 
-			{
-				// successfully consumed, so weapply the effects of the item in our
-				// game world's logic, which inour case means filling the gas tank a bit
-				Log.d(TAG, "Consumptionsuccessful. Provisioning.");
-				complain("Consumptionsuccessful. Provisioning.");
-				UnityLog("Consumptionsuccessful. Provisioning..");
-			}
-			else 
-			{
-				complain("Error whileconsuming: " + result);
-				UnityLog("Error whileconsuming: " + result);				
-			}
-			
-			Log.d(TAG, "End consumptionflow.");
-		}
-	};
-	
-	boolean verifyDeveloperPayload(Purchase p)
-    {
-    	String payload =p.getDeveloperPayload();
-    	
-	    /*
-         * TODO: verify that the developerpayload of the purchase is correct. It will be
-         * the same one that you sent wheninitiating the purchase.
-         *
-         * WARNING: Locally generating a randomstring when starting a purchase and
-         * verifying it here might seem like agood approach, but this will fail in the
-         * case where the user purchases anitem on one device and then uses your app on
-         * a different device, because on theother device you will not have access to the
-         * random string you originallygenerated.
-         *
-         * So a good developer payload hasthese characteristics:
-         *
-         * 1. If two different users purchasean item, the payload is different between them,
-         *   so that one user's purchase can't be replayed to another user.
-         *
-         * 2. The payload must be such that youcan verify it even when the app wasn't the
-         *   one who initiated the purchase flow (so that items purchased by the useron
-         *   one device work on other devices owned by the user).
-         *
-         * Using your own server to store andverify developer payloads across app
-         * installations is recommended.
-         */
-        return true;
     }
     
-	public void complain(String message) 
-	{
-		Log.e(TAG, "**** TrivialDrive Error: " + message);
-		alert("Error: " + message);
-	}
-
-	void alert(String message) 
-	{
-		AlertDialog.Builder bld = new AlertDialog.Builder(this);
-		bld.setMessage(message);
-		bld.setNeutralButton("OK", null);
-		
-		Log.d(TAG, "Showing alert dialog: " + message);
-		bld.create().show();
-	}
-
-	// send message to unity
-	void SendToUnityMessage(String Sendmessage)
-	{
-		UnityPlayer.UnitySendMessage("Main Camera","Messgae",Sendmessage);
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) 
+    {
+	    DebugLog(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
+	    
+	    // Pass on the activity result to the helper for handling
+	    if (!mHelper.handleActivityResult(requestCode, resultCode, data)) 
+	    {
+	        // not handled, so handle it ourselves (here's where you'd
+	        // perform any handling of activity results not related to in-app
+	        // billing...
+	        DebugLog(TAG, "handle it ourselves.");	        
+	        super.onActivityResult(requestCode, resultCode, data);
+	    }
+	    else 
+	    {
+	        DebugLog(TAG, "onActivityResult handled by IABUtil.");
+	    }
 	}
 	
-	void UnityLog(String str)
-	{
-		UnityPlayer.UnitySendMessage("Main Camera","Log", str);
-	}
-	
-    @Override protected void onNewIntent(Intent intent)
+	@Override protected void onNewIntent(Intent intent)
     {
     	alert("onNewIntent");
         // To support deep linking, we need to make sure that the client can get access to
@@ -411,8 +137,12 @@ public class UnityPlayerActivity extends Activity
         mUnityPlayer.quit();
         super.onDestroy();
         
-        if (mHelper != null) mHelper.dispose();
-        mHelper = null;
+        // very important:
+        DebugLog(TAG, "Destroying helper.");
+        if (mHelper != null) {
+            mHelper.disposeWhenFinished();
+            mHelper = null;
+        }
     }
 
     // Pause Unity
@@ -473,5 +203,235 @@ public class UnityPlayerActivity extends Activity
     @Override public boolean onKeyUp(int keyCode, KeyEvent event)     { return mUnityPlayer.injectEvent(event); }
     @Override public boolean onKeyDown(int keyCode, KeyEvent event)   { return mUnityPlayer.injectEvent(event); }
     @Override public boolean onTouchEvent(MotionEvent event)          { return mUnityPlayer.injectEvent(event); }
-    /*API12*/ public boolean onGenericMotionEvent(MotionEvent event)  { return mUnityPlayer.injectEvent(event); }
+    /*API12*/ public boolean onGenericMotionEvent(MotionEvent event)  { return mUnityPlayer.injectEvent(event); }    
+	
+	// Listener that's called when we finish querying the items and subscriptions weown
+	IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener()
+	{
+		public void onIabPurchaseFinished(IabResult result, Purchase purchase)
+		{
+			DebugLog(TAG, "Purchase finished: " + result + ", purchase:" + purchase);
+			if (result.isFailure()) 
+			{
+			     complain("Error purchasing: " +result); 
+			     //setWaitScreen(false);
+			     return;
+			} 
+			
+			if (!verifyDeveloperPayload(purchase)) 
+			{
+				complain("Error purchasing.Authenticity verification failed."); 
+				// setWaitScreen(false); 
+				return;
+			}
+			 
+			DebugLog(TAG, "Purchase successful."); 
+			if (purchase.getSku().equals(SKU_consume)) 
+			{ 
+				DebugLog(TAG, "Purchase is SKU_consume.Starting consumption.");
+				try
+				{
+					// consume after pay here
+					mHelper.consumeAsync(purchase, mConsumeFinishedListener);
+				}
+				catch (IabAsyncInProgressException e) 
+				{
+            		complain("Error consumeAsync in onIabPurchaseFinished." + e.getMessage());
+        		}
+			}
+			else
+			{
+				complain("Unknown purchase:" + purchase.getSku());
+			}
+		}
+	};
+	
+	// Listener that's called when we finishquerying the items and subscriptions we own
+	IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() 
+	{
+		public void onQueryInventoryFinished(IabResult result, Inventory inventory) 
+		{
+			DebugLog(TAG, "Query inventoryfinished.");
+			// Have we been disposed of in themeantime? If so, quit.
+			if (mHelper == null) return;
+			// Is it a failure?
+			if (result.isFailure()) 
+			{
+				complain("Failed to queryinventory: " + result);
+				//return;
+			}
+			
+			DebugLog(TAG, "Query inventorywas successful.");
+					
+			// Check for gas delivery -- if weown gas, we should fill up the tank immediately
+			// Maybe there are some skus
+			String sku_jb1 = SKU_CONSUME_JB_PREFIX + "1";
+			Purchase jbPurchase = inventory.getPurchase(sku_jb1);
+			if (jbPurchase != null &&verifyDeveloperPayload(jbPurchase)) 
+			{
+				DebugLog(TAG, "We have sku1.Consuming it.");
+				try
+				{
+					mHelper.consumeAsync(inventory.getPurchase(sku_jb1), mConsumeFinishedListener);
+				}
+				catch (IabAsyncInProgressException e) 
+				{
+            		complain("Error consumeAsync in onQueryInventoryFinished." + e.getMessage());
+        		}
+			}
+			else
+			{
+				DebugLog(TAG, "We dont have sku1.");
+			}
+			
+			DebugLog(TAG, "Initial inventoryquery finished; enabling main UI.");
+		}
+	};
+
+	// Called when consumption is complete
+	IabHelper.OnConsumeFinishedListener mConsumeFinishedListener = new IabHelper.OnConsumeFinishedListener() 
+	{
+		public void onConsumeFinished(Purchase purchase, IabResult result) 
+		{
+			DebugLog(TAG, "Consumptionfinished. Purchase: " + purchase + ", result: " + result);
+			// if we were disposed of in themeantime, quit.
+			if (mHelper == null) return;
+			
+			// We know this is the"gas" sku because it's the only one we consume,
+			// so we don't check which sku wasconsumed. If you have more than one
+			// sku, you probably shouldcheck...
+			
+			if (result.isSuccess()) 
+			{
+				// successfully consumed, so weapply the effects of the item in our
+				// game world's logic, which inour case means filling the gas tank a bit
+				DebugLog(TAG, "Consumptionsuccessful. Provisioning.");
+				
+				// send the comsume result to unity
+				UnityConsumeComplete(purchase.getPackageName(),
+					purchase.getSku(),
+					purchase.getToken(),
+					purchase.getOrderId(),
+					"");
+			}
+			else 
+			{
+				complain("Error whileconsuming: " + result);				
+			}
+			
+			DebugLog(TAG, "End consumptionflow.");
+		}
+	};
+	
+	boolean verifyDeveloperPayload(Purchase p)
+    {
+    	String payload = p.getDeveloperPayload();
+    	
+	    /*
+         * TODO: verify that the developerpayload of the purchase is correct. It will be
+         * the same one that you sent wheninitiating the purchase.
+         *
+         * WARNING: Locally generating a randomstring when starting a purchase and
+         * verifying it here might seem like agood approach, but this will fail in the
+         * case where the user purchases anitem on one device and then uses your app on
+         * a different device, because on theother device you will not have access to the
+         * random string you originallygenerated.
+         *
+         * So a good developer payload hasthese characteristics:
+         *
+         * 1. If two different users purchasean item, the payload is different between them,
+         *   so that one user's purchase can't be replayed to another user.
+         *
+         * 2. The payload must be such that youcan verify it even when the app wasn't the
+         *   one who initiated the purchase flow (so that items purchased by the useron
+         *   one device work on other devices owned by the user).
+         *
+         * Using your own server to store andverify developer payloads across app
+         * installations is recommended.
+         */
+        return true;
+    }
+    
+	public void complain(String message) 
+	{
+		Log.e(TAG, "**** Sloter Error: " + message);
+		LogToFile.d(TAG, "**** Sloter Error: " + message);
+		alert("Error: " + message);
+	}
+
+	void alert(String message) 
+	{
+		AlertDialog.Builder bld = new AlertDialog.Builder(this);
+		bld.setMessage(message);
+		bld.setNeutralButton("OK", null);
+		
+		DebugLog(TAG, "Showing alert dialog: " + message);
+		bld.create().show();
+	}
+	
+	// static UUID
+	protected synchronized static String GetUniqueID(Context context) 
+	{
+		if (UNIQUE_id == null) 
+		{
+			SharedPreferences sharedPrefs = context.getSharedPreferences(
+				PREF_UNIQUE_ID, Context.MODE_PRIVATE);
+			UNIQUE_id = sharedPrefs.getString(PREF_UNIQUE_ID, null);
+			if (UNIQUE_id == null) 
+			{
+				UNIQUE_id = UUID.randomUUID().toString();
+				Editor editor = sharedPrefs.edit();
+				editor.putString(PREF_UNIQUE_ID, UNIQUE_id);
+				editor.commit();
+			}
+		}
+		return UNIQUE_id;
+	}
+	
+	// Debug log
+	public void DebugLog(String tag, String info)
+	{
+		Log.d(tag, info);
+		LogToFile.d(tag, info);
+	}
+	
+	//-----------------------interactive with unity
+	// send message to unity
+	void UnityConsumeComplete(String packageName,
+        String sku,
+        String token,
+        String orderId,
+        String others)
+	{
+		UnityPlayer.UnitySendMessage("Main Camera", "Message", "beginConsumeComplete");
+		UnityPlayer.UnitySendMessage("Main Camera", "Message", packageName);
+		UnityPlayer.UnitySendMessage("Main Camera", "Message", sku);
+		UnityPlayer.UnitySendMessage("Main Camera", "Message", token);
+		UnityPlayer.UnitySendMessage("Main Camera", "Message", orderId);
+		UnityPlayer.UnitySendMessage("Main Camera", "Message", others);
+		UnityPlayer.UnitySendMessage("Main Camera", "Message", "endConsumeComplete");
+	}
+	
+	// Pay for unity
+	public void Pay(final String buykey)
+	{
+		DebugLog(TAG, "Try to pay:" + buykey);
+		
+		SKU_consume = buykey;		
+		String payload = "";
+		try
+		{
+			mHelper.launchPurchaseFlow(this, buykey, RC_REQUEST, mPurchaseFinishedListener, payload);
+		}
+		catch (IabAsyncInProgressException e) 
+		{
+            complain("Error launchPurchaseFlow:" + e.getMessage());
+        }
+	}
+	
+	// UUID for unity
+	public String GetUID()
+	{
+		return GetUniqueID(getApplicationContext());
+	}
 }
