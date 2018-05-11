@@ -50,7 +50,7 @@ public class SlotReel : MonoBehaviour
         m_speed = rdSpped.Next(2000, 3000);
         m_item = item > 5 ? item % 5 : item;
 
-        //Debug.Log(ItemStringArray[m_item]);
+        //DebugConsole.Log(ItemStringArray[m_item]);
         m_curTimer = RollingTime; // 滚动2秒
 
         if (m_bonus != null)
@@ -123,7 +123,7 @@ public class SlotReel : MonoBehaviour
                 Transform tfImage = tfPanel.transform.Find(imgName);
                 if (tfImage == null)
                 {
-                    Debug.Log("Cant find:" + imgName);
+                    DebugConsole.Log("Cant find:" + imgName);
                 }
                 else
                 {
@@ -160,7 +160,7 @@ public class SlotReel : MonoBehaviour
                 Transform tfImage = tfPanel.transform.Find(imgName);
                 if (tfImage == null)
                 {
-                    Debug.Log("Cant find:" + imgName);
+                    DebugConsole.Log("Cant find:" + imgName);
                 }
                 else
                 {

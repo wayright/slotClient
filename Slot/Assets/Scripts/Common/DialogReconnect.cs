@@ -17,13 +17,13 @@ public class DialogReconnect : MonoBehaviour {
         GameObject canvas = GameObject.Find("Canvas");
         if (canvas == null)
         {
-            Debug.Log("canvas == null");
+            DebugConsole.Log("canvas == null");
             return;
         }
         Transform tf = canvas.transform.Find("DialogReconnect");
         if (tf == null)
         {
-            Debug.Log("tf == null");
+            DebugConsole.Log("tf == null");
             return;
         }
         GameObject obj = canvas.transform.Find("DialogReconnect").gameObject;
@@ -35,13 +35,13 @@ public class DialogReconnect : MonoBehaviour {
         GameObject canvas = GameObject.Find("Canvas");
         if (canvas == null)
         {
-            Debug.Log("canvas == null");
+            DebugConsole.Log("canvas == null");
             return;
         }
         Transform tf = canvas.transform.Find("DialogReconnect");
         if (tf == null)
         {
-            Debug.Log("tf == null");
+            DebugConsole.Log("tf == null");
             return;
         }
         GameObject obj = canvas.transform.Find("DialogReconnect").gameObject;
@@ -55,10 +55,10 @@ public class DialogReconnect : MonoBehaviour {
 
         GameObject textObj = obj.transform.Find("Content").gameObject;
         if (textObj == null)
-            Debug.Log("textObj == null");
+            DebugConsole.Log("textObj == null");
         m_text = textObj.GetComponent<Text>();
         if (m_text == null)
-            Debug.Log("m_text == null");
+            DebugConsole.Log("m_text == null");
     }
     public void DoHide(GameObject obj)
     {

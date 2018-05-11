@@ -35,7 +35,7 @@ public class SlotRequests{
     public void QuickLogin()
     {
         if (m_clerk == null)
-            Debug.Log("Clerk is null");
+            DebugConsole.Log("Clerk is null");
 
         QuickLoginInfo quickLoginInfo = new QuickLoginInfo();
         quickLoginInfo.UserId = m_clerk.UId;
@@ -47,7 +47,7 @@ public class SlotRequests{
     {
         if (!m_clerk.Login)
         {
-            Debug.Log("!Login, cant reqspin");
+            DebugConsole.Log("!Login, cant reqspin");
             // Show dialog here
             DialogBase.Show("MESSAGE", "!Login, cant reqspin");
             return;

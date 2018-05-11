@@ -74,7 +74,7 @@ public class DialogFriends : DialogBase
             m_btnIndexDict.Add(btnName, i);
             GameObject btnObj = GameObject.Find(btnName);
             if (null == btnObj)
-                Debug.Log(btnName + " is null!");
+                DebugConsole.Log(btnName + " is null!");
             Button btn = btnObj.GetComponent<Button>();
             btn.onClick.AddListener(delegate()
             {
@@ -128,7 +128,7 @@ public class DialogFriends : DialogBase
         if (fslist.Data.Count > Constants.PageItemCount)
         {
             showCount = Constants.PageItemCount;
-            Debug.Log("list.Data.Count > Constants.PageItemCount");
+            DebugConsole.Log("list.Data.Count > Constants.PageItemCount");
         }
 
         for (int i = 0; i < showCount; ++i)
@@ -181,7 +181,7 @@ public class DialogFriends : DialogBase
         if (fslist.Data.Count > Constants.PageItemCount)
         {
             showCount = Constants.PageItemCount;
-            Debug.Log("list.Data.Count > Constants.PageItemCount");
+            DebugConsole.Log("list.Data.Count > Constants.PageItemCount");
         }
 
         for (int i = 0; i < showCount; ++i)
@@ -241,6 +241,12 @@ public class DialogFriends : DialogBase
             go.SetActive(true);
             go.transform.Find("txtSearchResultName").GetComponent<Text>().text = fslist.Data[0].Name;
             go.transform.Find("txtSearchResultLevel").GetComponent<Text>().text = fslist.Data[0].Level.ToString();
+            int headIndex = Tools.StringToInt32(fslist.Data[0].HeadImgUrl);
+            if (headIndex > 0)
+            {
+                GameObject goSrc = DialogSelectAvatar.GetHeadObject(fslist.Data[0].HeadImgUrl);
+                go.transform.Find("ImgHead").GetComponent<Image>().sprite = goSrc.GetComponent<Image>().sprite;                
+            }
 
             if (goNoResults != null)
                 goNoResults.GetComponent<Text>().text = "";
@@ -292,11 +298,11 @@ public class DialogFriends : DialogBase
     }
     void OnClick(GameObject sender)
     {
-        Debug.Log(sender.name);
+        DebugConsole.Log(sender.name);
         int btnIndex = GetBtn(sender.name);
         if (btnIndex < 0)
         {
-            Debug.Log("Cant find button:" + sender.name);
+            DebugConsole.Log("Cant find button:" + sender.name);
             return;
         }
         switch ((DialogBtn)btnIndex)
@@ -306,11 +312,11 @@ public class DialogFriends : DialogBase
                     GameObject btnObj = GameObject.Find(DialogName);
                     if (null == btnObj)
                     {
-                        Debug.Log("null");
+                        DebugConsole.Log("null");
                     }
                     else
                     {
-                        Debug.Log("DoHide");
+                        DebugConsole.Log("DoHide");
                         DoHide(btnObj);
                     }
                 }
@@ -350,16 +356,8 @@ public class DialogFriends : DialogBase
                     Reception recp = GameObject.Find("Reception").GetComponent<Reception>();
                     GameObject goInput = GameObject.Find("InputSearchFriendCode");
                     string uIdStr = goInput.transform.Find("Text").GetComponent<Text>().text;
-                    Debug.Log("Search:" + uIdStr);
-                    long uId = 0;
-                    try
-                    {
-                        uId = System.Convert.ToInt64(uIdStr);
-                    }
-                    catch(System.Exception e)
-                    {
-                        Debug.Log(e.Message);
-                    }
+                    DebugConsole.Log("Search:" + uIdStr);
+                    long uId = Tools.StringToInt64(uIdStr);
 
                     // 先清理结果
                     Lobby.getInstance().CurrentSummaryList.Data.Clear();

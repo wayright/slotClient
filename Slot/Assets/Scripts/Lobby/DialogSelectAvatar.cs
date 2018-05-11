@@ -75,14 +75,39 @@ public class DialogSelectAvatar : DialogBase
         m_showing = true;
         m_show = s_InitScale;
         m_callBack = cb;
+
+        string url = Lobby.getInstance().UserInfo.HeadImgUrl;
+        int headIndex = Tools.StringToInt32(url);
+        if (headIndex > 0)
+        {
+            m_headIndex = headIndex;
+            GameObject goHead = GameObject.Find("Head" + headIndex.ToString());
+            GameObject go = GameObject.Find("Review");
+            go.GetComponent<Image>().sprite = goHead.GetComponent<Image>().sprite;
+        }
+    }
+    public static GameObject GetHeadObject(string headImgUrl)
+    {
+        string headStr = "Head" + headImgUrl;
+        GameObject goSrc = null;
+        Transform tf =
+            DialogSelectAvatar.GetInstance().transform.Find("main").
+            transform.Find("Avatars").
+            transform.Find("GridLayeout").
+            transform.Find(headStr);
+
+        if (tf != null)
+            goSrc = tf.gameObject;
+
+        return goSrc;
     }
     void OnClick(GameObject sender)
     {
-        Debug.Log(sender.name);
+        DebugConsole.Log(sender.name);
         int btnIndex = GetBtn(sender.name);
         if (btnIndex < 0)
         {
-            Debug.Log("Cant find button:" + sender.name);
+            DebugConsole.Log("Cant find button:" + sender.name);
             return;
         }
         switch ((DialogBtn)btnIndex)
@@ -92,11 +117,11 @@ public class DialogSelectAvatar : DialogBase
                     GameObject btnObj = GameObject.Find(DialogName);
                     if (null == btnObj)
                     {
-                        Debug.Log("null");
+                        DebugConsole.Log("null");
                     }
                     else
                     {
-                        Debug.Log("DoHide");
+                        DebugConsole.Log("DoHide");
                         DoHide(btnObj);
                     }
                 }

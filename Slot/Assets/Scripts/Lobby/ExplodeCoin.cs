@@ -72,7 +72,7 @@ public class ExplodeCoin : MonoBehaviour {
         m_startY = transform.position.y;
         //System.Threading.Thread.Sleep(OffsetTime);
         m_startTime = 666;
-        //Debug.Log("StartY:" + m_startY);
+        //DebugConsole.Log("StartY:" + m_startY);
 	}
 	
 	// Update is called once per frame
@@ -84,7 +84,7 @@ public class ExplodeCoin : MonoBehaviour {
             transform.position = new Vector3(transform.position.x, m_startY - h, transform.position.z);
         }
 
-        //Debug.Log("CurY:" + (m_startY - h).ToString() + ",t=" + t.ToString());
+        //DebugConsole.Log("CurY:" + (m_startY - h).ToString() + ",t=" + t.ToString());
         //transform.Translate(Vector3.right * Time.deltaTime, Space.World);
         transform.Rotate(Vector3.up, Time.deltaTime * 720);
 

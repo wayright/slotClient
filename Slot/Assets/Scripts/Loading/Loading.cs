@@ -36,7 +36,7 @@ public class Loading : MonoBehaviour {
             while (displayProgress < toProgress)
             {
                 ++displayProgress;
-                Debug.Log("Progress:" + displayProgress);
+                DebugConsole.Log("Progress:" + displayProgress);
                 //SetLoadingPercentage(displayProgress);
                 yield return new WaitForEndOfFrame();
             }
@@ -47,7 +47,7 @@ public class Loading : MonoBehaviour {
         {
             ++displayProgress;
             //SetLoadingPercentage(displayProgress);
-            Debug.Log("Progress:" + displayProgress);
+            DebugConsole.Log("Progress:" + displayProgress);
             yield return new WaitForEndOfFrame();
         }
         op.allowSceneActivation = true;

@@ -36,7 +36,7 @@ public class ProtoNet
     public static void WriteLog(object obj)
     {
 #if U3D
-        Debug.Log(obj);
+        DebugConsole.Log(obj.ToString());
 #else
         MessageBox.Show(obj.ToString());
 #endif
@@ -128,6 +128,8 @@ public class ProtoNet
     /// <param name="port">端口</param>  
     public bool Init(string ipStr, int port)
     {
+        System.Random rand = new System.Random();
+        m_msgId = rand.Next(10000, 20000); // rand start msg id
         m_running = true;
         m_ip = ipStr;
         m_port = port;
@@ -167,15 +169,15 @@ public class ProtoNet
             m_socket = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream,
                 ProtocolType.Tcp);
-
+            /*
             m_socket.SetSocketOption(SocketOptionLevel.Socket,
                 SocketOptionName.SendTimeout,
-                1000);
+                1000);*/
 
             m_socket.Connect(IPAddress.Parse(m_ip), m_port);
             if (!m_socket.Connected)
             {
-                Debug.Log("Failed to socket connect.");
+                DebugConsole.Log("Failed to socket connect.");
             }
 
             m_tkRecvMessageFromServer = Task.Factory.StartNew(() =>
@@ -292,6 +294,7 @@ public class ProtoNet
         packet.msgId = m_msgId++;
         packet.proto = obj;
 
+        DebugConsole.Log("m_sendQueue enqueue:cmd=" + cmdId.ToString() + ", msgid=" + packet.msgId.ToString());
         m_sendQueue.Enqueue(packet);
     }
 
@@ -367,6 +370,7 @@ public class ProtoNet
             }
             else
             {
+                WriteLog("SendMessage Error:!Connected");
                 return false;
             }
         }
@@ -382,7 +386,7 @@ public class ProtoNet
     /// </summary>  
     private void SendMessage()
     {
-        Debug.Log("SendMessage enter");
+        DebugConsole.Log("SendMessage enter");
 
         try
         {
@@ -457,7 +461,7 @@ public class ProtoNet
     /// </summary>  
     private void ReceiveMessage()
     {
-        Debug.Log("ReceiveMessage enter");
+        DebugConsole.Log("ReceiveMessage enter");
         // Sleep 测试接收短线！！！
         try
         {
@@ -577,7 +581,7 @@ public class ProtoNet
             foreach (var item in m_callBackElapse)
             {
                 int sec = item.Value;
-                if (secCur - sec > 30)
+                if (secCur - sec > 300)
                 {
                     delList.Add(item.Key);
                 }
@@ -586,14 +590,14 @@ public class ProtoNet
             for (int i = 0; i < delList.Count; ++i )
             {
                 int key = delList[i];
-                Debug.Log("Delete time out callback");
+                DebugConsole.Log("Delete time out callback");
                 m_callbackDict.Remove(key);
                 m_callBackElapse.Remove(key);
             }
 
             if (!m_types.ContainsKey(cmdId))
             {
-                Debug.Log("Not supported cmdId:" + cmdId + " in ProtoNet:" + m_name);
+                DebugConsole.Log("Not supported cmdId:" + cmdId + " in ProtoNet:" + m_name);
             }
             else
             {
@@ -603,7 +607,7 @@ public class ProtoNet
                 object obj = m_types[cmdId].ParseFrom(Body, 0, Body.Length);
                 if (obj == null)
                 {
-                    Debug.Log("Deserialize error for cmdId:" + cmdId + " in ProtoNet:" + m_name);
+                    DebugConsole.Log("Deserialize error for cmdId:" + cmdId + " in ProtoNet:" + m_name);
                 }
                 else
                 {

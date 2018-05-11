@@ -39,7 +39,7 @@ public class DialogBase : MonoBehaviour {
             GameObject btnObj = GameObject.Find(btns[i]);
             if (btnObj == null)
             {
-                Debug.Log("null");
+                DebugConsole.Log("null");
             }
             else
             {
@@ -60,7 +60,7 @@ public class DialogBase : MonoBehaviour {
             GameObject btnObj = GameObject.Find(btnName);
             if (null == btnObj)
             {
-                Debug.Log("null");
+                DebugConsole.Log("null");
             }
             else
             {
@@ -69,7 +69,7 @@ public class DialogBase : MonoBehaviour {
         }
         else if (sender.name == "OK")
         {
-            Debug.Log("OK");
+            DebugConsole.Log("OK");
             if (m_callBack != null)
             {
                 m_callBack();
@@ -93,7 +93,7 @@ public class DialogBase : MonoBehaviour {
         WorkDone cb = null)
     {
         m_dialog = obj;
-        //Debug.Log(m_dialog.transform.position);
+        //DebugConsole.Log(m_dialog.transform.position);
         //m_dialog.transform.position = new Vector3(0, 0, 0);
         m_dialog.transform.localScale = new Vector3(0, 0, 0);
         m_dialog.SetActive(true);

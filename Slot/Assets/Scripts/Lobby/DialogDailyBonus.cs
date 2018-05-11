@@ -57,11 +57,11 @@ public class DialogDailyBonus : DialogBase
     
     void OnClick(GameObject sender)
     {
-        Debug.Log(sender.name);
+        DebugConsole.Log(sender.name);
         int btnIndex = GetBtn(sender.name);
         if (btnIndex < 0)
         {
-            Debug.Log("Cant find button:" + sender.name);
+            DebugConsole.Log("Cant find button:" + sender.name);
             return;
         }
         switch ((DialogBtn)btnIndex)
@@ -71,11 +71,11 @@ public class DialogDailyBonus : DialogBase
                     GameObject btnObj = GameObject.Find(DialogName);
                     if (null == btnObj)
                     {
-                        Debug.Log("null");
+                        DebugConsole.Log("null");
                     }
                     else
                     {
-                        Debug.Log("DoHide");
+                        DebugConsole.Log("DoHide");
                         DoHide(btnObj);
                     }
                 }
@@ -110,7 +110,7 @@ public class DialogDailyBonus : DialogBase
         }
         else
         {
-            Debug.Log("invalid day:" + m_day);
+            DebugConsole.Log("invalid day:" + m_day);
         }
     }
 	// Use this for initialization

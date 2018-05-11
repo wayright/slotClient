@@ -63,7 +63,7 @@ public class DialogPersonalInfo : DialogBase
             m_btnIndexDict.Add(btnName, i);
             GameObject btnObj = GameObject.Find(btnName);
             if (null == btnObj)
-                Debug.Log(btnName + " is null!");
+                DebugConsole.Log(btnName + " is null!");
             Button btn = btnObj.GetComponent<Button>();
             btn.onClick.AddListener(delegate()
             {
@@ -141,9 +141,25 @@ public class DialogPersonalInfo : DialogBase
         GameObject.Find("valLike").GetComponent<Text>().text = ui.Praise.ToString();
 
         // 头像
-        if (ui.HeadImgUrl != "")
+        //if (ui.HeadImgUrl != "")
         {
-            //StartCoroutine(Tools.LoadWWWImageToButton(ui.HeadImgUrl, "BtnUpAvatar"));
+            GameObject goSrc = DialogSelectAvatar.GetHeadObject(ui.HeadImgUrl); ;
+
+            if (goSrc != null)
+            {
+                GameObject goDest =
+                   DialogPersonalInfo.GetInstance().transform.Find("main").
+                   transform.Find("BtnUpAvatar").gameObject;
+                goDest.GetComponent<Image>().sprite = goSrc.GetComponent<Image>().sprite;
+            }
+            else
+            {
+                GameObject goHeadDefault = GameObject.Find("BtnAvatar").transform.Find("BtnHeadDefault").gameObject;
+                GameObject goDest =
+                   DialogPersonalInfo.GetInstance().transform.Find("main").
+                   transform.Find("BtnUpAvatar").gameObject;
+                goDest.GetComponent<Image>().sprite = goHeadDefault.GetComponent<Image>().sprite;
+            }
         }
     }
     
@@ -228,11 +244,11 @@ public class DialogPersonalInfo : DialogBase
     }
     void OnClick(GameObject sender)
     {
-        Debug.Log(sender.name);
+        DebugConsole.Log(sender.name);
         int btnIndex = GetBtn(sender.name);
         if (btnIndex < 0)
         {
-            Debug.Log("Cant find button:" + sender.name);
+            DebugConsole.Log("Cant find button:" + sender.name);
             return;
         }
         switch ((DialogBtn)btnIndex)
@@ -242,11 +258,11 @@ public class DialogPersonalInfo : DialogBase
                     GameObject btnObj = GameObject.Find(DialogName);
                     if (null == btnObj)
                     {
-                        Debug.Log("null");
+                        DebugConsole.Log("null");
                     }
                     else
                     {
-                        Debug.Log("DoHide");
+                        DebugConsole.Log("DoHide");
                         DoHide(btnObj);
                     }
                 }
@@ -276,7 +292,7 @@ public class DialogPersonalInfo : DialogBase
             case DialogBtn.UpAvatar:
             case DialogBtn.UploadAvatar:
                 {
-                    //Debug.Log("Upload...");
+                    //DebugConsole.Log("Upload...");
                     DialogSelectAvatar.Show(UpdateAvatar);
                 }
                 break;

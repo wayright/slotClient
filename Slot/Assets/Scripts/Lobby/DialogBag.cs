@@ -76,13 +76,13 @@ public class DialogBag : DialogBase
     {
         UserItemList uil = Lobby.getInstance().UserItemList;
 
-        Debug.Log("UserItemList kind:" + uil.Kind);
+        DebugConsole.Log("UserItemList kind:" + uil.Kind);
         if (uil.Data.Count > 0)
         {
-            Debug.Log("Attr:" + uil.Data[0].Attr);
-            Debug.Log("ItemId:" + uil.Data[0].ItemId);
-            Debug.Log("ItemCount:" + uil.Data[0].ItemCount);
-            Debug.Log("ExpireTime:" + uil.Data[0].ExpireTime);
+            DebugConsole.Log("Attr:" + uil.Data[0].Attr);
+            DebugConsole.Log("ItemId:" + uil.Data[0].ItemId);
+            DebugConsole.Log("ItemCount:" + uil.Data[0].ItemCount);
+            DebugConsole.Log("ExpireTime:" + uil.Data[0].ExpireTime);
 
             GameObject goItem = GameObject.Find("Item1");
             goItem.transform.Find("data").transform.Find("Count").GetComponent<Text>().text = uil.Data[0].ItemCount.ToString();
@@ -90,11 +90,11 @@ public class DialogBag : DialogBase
     }
     void OnClick(GameObject sender)
     {
-        Debug.Log(sender.name);
+        DebugConsole.Log(sender.name);
         int btnIndex = GetBtn(sender.name);
         if (btnIndex < 0)
         {
-            Debug.Log("Cant find button:" + sender.name);
+            DebugConsole.Log("Cant find button:" + sender.name);
             return;
         }
         switch ((DialogBtn)btnIndex)
@@ -104,11 +104,11 @@ public class DialogBag : DialogBase
                     GameObject btnObj = GameObject.Find(DialogName);
                     if (null == btnObj)
                     {
-                        Debug.Log("null");
+                        DebugConsole.Log("null");
                     }
                     else
                     {
-                        Debug.Log("DoHide");
+                        DebugConsole.Log("DoHide");
                         DoHide(btnObj);
                     }
                 }

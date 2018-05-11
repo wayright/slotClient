@@ -55,7 +55,7 @@ public class LocalizationManager
         m_dic.TryGetValue(key, out value);
         if (value == null)
         {
-            Debug.Log("Cant find value!");
+            DebugConsole.Log("Cant find value!");
         }
         return value;
     }  

@@ -34,11 +34,11 @@ public class SlotButtonEvents : MonoBehaviour {
         int btnIndex = GetBtnIndexFromName(sender.name);
         if (btnIndex < 0)
         {
-            Debug.Log("Cant find button:" + sender.name);
+            DebugConsole.Log("Cant find button:" + sender.name);
             return;
         }
 
-        Debug.Log("You click button:" + sender.name);
+        DebugConsole.Log("You click button:" + sender.name);
         
         switch ((Constants.Btn)btnIndex)
         {
@@ -62,7 +62,7 @@ public class SlotButtonEvents : MonoBehaviour {
             case Constants.Btn.Btn_Return:
                 m_clerk.Displays.PlayAudio(Constants.Audio.Audio_Spin);
                 m_clerk.Net.Close();
-                Debug.Log("Slot enter lobby scene");
+                DebugConsole.Log("Slot enter lobby scene");
                 SceneManager.LoadScene("lobby");
                 break;
             default:
@@ -105,7 +105,7 @@ public class SlotButtonEvents : MonoBehaviour {
         
         if (m_clerk.Spinning)
         {
-            Debug.Log("I'm spinning!");
+            DebugConsole.Log("I'm spinning!");
             DialogBase.Show("MESSAGE", "I'm spinning!SpinSeqNo:" + m_clerk.SeqNo);
             return;
         }
@@ -118,7 +118,7 @@ public class SlotButtonEvents : MonoBehaviour {
 
         if (m_clerk.Win > 0) // 有奖励没有领取
         {
-            Debug.Log("Error!"); // 当前是自动领取
+            DebugConsole.Log("Error!"); // 当前是自动领取
             DialogBase.Show("MESSAGE", "有奖励没有领取");
             m_clerk.Displays.ShowJumpWin(); // 点击领取
         }

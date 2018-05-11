@@ -36,6 +36,40 @@ public class Tools
         return s;
     }
     /// <summary>  
+    /// 字符串转Int32
+    /// </summary>  
+    /// <param name="str">字符串</param>
+    public static int StringToInt32(string str)
+    {
+        int iVal = 0;
+        try
+        {
+            iVal = System.Convert.ToInt32(str);
+        }
+        catch (System.Exception e)
+        {
+            DebugConsole.Log(e.Message);
+        }
+        return iVal;
+    }
+    /// <summary>  
+    /// 字符串转Int64
+    /// </summary>  
+    /// <param name="str">字符串</param>
+    public static long StringToInt64(string str)
+    {
+        long i64Val = 0;
+        try
+        {
+            i64Val = System.Convert.ToInt64(str);
+        }
+        catch (System.Exception e)
+        {
+            DebugConsole.Log(e.Message);
+        }
+        return i64Val;
+    }
+    /// <summary>  
     /// 加载图像，并设置到按钮
     /// </summary>  
     /// <param name="url">图像地址</param>

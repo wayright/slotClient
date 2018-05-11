@@ -65,7 +65,7 @@ public class Lobby{
         int totalPage = FriendPageCount;
         if (m_curFriendPage < 0 || m_curFriendPage >= totalPage)
         {
-            Debug.Log("Invalid friend page index." + m_curFriendPage);
+            DebugConsole.Log("Invalid friend page index." + m_curFriendPage);
             m_curFriendPage = 0;
         }
 

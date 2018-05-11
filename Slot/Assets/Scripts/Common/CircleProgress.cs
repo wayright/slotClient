@@ -16,7 +16,7 @@ public class CircleProgress : MonoBehaviour {
 	void Update () {
         if (m_currentAmout < s_TargetAmout)
         {
-            //Debug.Log("currentAmount:" + currentAmout.ToString());
+            //DebugConsole.Log("currentAmount:" + currentAmout.ToString());
 
             m_currentAmout += m_speed;
             if (m_currentAmout > s_TargetAmout)

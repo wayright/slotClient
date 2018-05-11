@@ -75,7 +75,7 @@ public class StartLoading : MonoBehaviour {
         m_net.CheckReconnect();
         //if (m_net.CheckReconnect())
         //{
-            //Debug.Log("Door:Reconnect successful.");
+            //DebugConsole.Log("Door:Reconnect successful.");
             //CheckLogin();
 
             //DialogBase.Hide();
@@ -84,14 +84,14 @@ public class StartLoading : MonoBehaviour {
         ProtoPacket packet = new ProtoPacket();
         if (m_net.RecvTryDequeue(ref packet))
         {
-            Debug.Log("Door:Reception handle cmdId:" + packet.cmdId);
+            DebugConsole.Log("Door:Reception handle cmdId:" + packet.cmdId);
             switch (packet.cmdId)
             {
                 case Constants.Dog_Login:
                     {
                         LoginResp loginResp = (LoginResp)packet.proto;
                         Lobby.getInstance().UId = loginResp.UserId;
-                        Debug.Log("UId:" + loginResp.UserId);
+                        DebugConsole.Log("UId:" + loginResp.UserId);
                         m_login = true;
                         
                         // 登录成功，重定向
@@ -112,7 +112,7 @@ public class StartLoading : MonoBehaviour {
 
                         m_net.Close();
                         // 重定向到大厅
-                        Debug.Log("Door:Redirect to lobby:" +
+                        DebugConsole.Log("Door:Redirect to lobby:" +
                             lobby.Domain + ":" + lobby.Port);
 
                         StartCoroutine(LoadingScene());
@@ -125,14 +125,14 @@ public class StartLoading : MonoBehaviour {
                         {
                             ProtoNet.WriteLog("Door:Reconnecting...");
                             // 3s后Display中重连
-                            m_net.CheckReconnect(3);
+                            m_net.CheckReconnect(5);
                             //DialogBase.Show("RECONNECT", "reconnecting");
                             GameObject.Find("RcText").GetComponent<Text>().text = "Reconnecting...";
                             m_net.Ip = "182.92.74.240";
                         }
                         else if (packet.msgId == 2)
                         {
-                            Debug.Log("Door:Reconnect successful.");
+                            DebugConsole.Log("Door:Reconnect successful.");
                             //DialogBase.Hide();
                             GameObject.Find("RcText").GetComponent<Text>().text = "Connect successfully.";
                             WorkDone callBack = new WorkDone(Redirect);
@@ -147,7 +147,7 @@ public class StartLoading : MonoBehaviour {
                     break;
                 default:
                     {
-                        Debug.Log("Door:Invalid cmdId:" + packet.cmdId);
+                        DebugConsole.Log("Door:Invalid cmdId:" + packet.cmdId);
                     }
                     break;
             }
@@ -171,7 +171,7 @@ public class StartLoading : MonoBehaviour {
             {
                 ++displayProgress;
                 GameObject.Find("RcText").GetComponent<Text>().text = "Loading..." + displayProgress.ToString() + "%";
-                Debug.Log("Door:Progress:" + displayProgress);
+                DebugConsole.Log("Door:Progress:" + displayProgress);
                 //SetLoadingPercentage(displayProgress);
                 yield return new WaitForEndOfFrame();
             }
@@ -183,7 +183,7 @@ public class StartLoading : MonoBehaviour {
             ++displayProgress;
             GameObject.Find("RcText").GetComponent<Text>().text = "Loading..." + displayProgress.ToString() + "%";
             //SetLoadingPercentage(displayProgress);
-            Debug.Log("Door:Progress:" + displayProgress);
+            DebugConsole.Log("Door:Progress:" + displayProgress);
             yield return new WaitForEndOfFrame();
         }
         op.allowSceneActivation = true;

@@ -47,6 +47,7 @@ public class Reception : MonoBehaviour
         m_net.Add(Constants.Lion_TakeLoginBonus, LongArray.Parser);
         m_net.Add(Constants.Lion_NotifyFreeBonus, LongValue.Parser);
         m_net.Add(Constants.Lion_TakeFreeBonus, LongArray.Parser);
+        m_net.Add(Constants.Lion_BuyItem, Status.Parser);
         m_net.Add(Constants.Lion_GetItems, UserItemList.Parser);
         m_net.Add(-2, null);
         m_net.Add(Constants.Reconnect, null);
@@ -67,18 +68,18 @@ public class Reception : MonoBehaviour
 
         // 启动登录
         Lobby lobby = Lobby.getInstance();
-        Debug.Log("Loading start:" + lobby.Domain);
+        DebugConsole.Log("Loading start:" + lobby.Domain);
         if (lobby.Domain == "")
         {            
             SceneManager.LoadSceneAsync("sloading");
         }
         else
         {
-            Debug.Log("Loading start2:" + lobby.Domain);
+            DebugConsole.Log("Loading start2:" + lobby.Domain);
             if (false == m_net.Init(lobby.Domain, lobby.Port))
             {
                 // 这里不重连，在发送请求失败后再重连
-                Debug.Log("Reception:Client init failed!");
+                DebugConsole.Log("Reception:Client init failed!");
             }
 
             QuickLogin();
@@ -109,7 +110,7 @@ public class Reception : MonoBehaviour
 
         if (aud >= Constants.Audio.Audio_Max)
         {
-            Debug.Log("Ivalid audio enum");
+            DebugConsole.Log("Ivalid audio enum");
             return;
         }
 
@@ -124,7 +125,7 @@ public class Reception : MonoBehaviour
         int btnIndex = GetBtnIndexFromName(sender.name);
         if (btnIndex < 0)
         {
-            Debug.Log("Cant find button:" + sender.name);
+            DebugConsole.Log("Cant find button:" + sender.name);
             return;
         }
 
@@ -193,7 +194,13 @@ public class Reception : MonoBehaviour
                 break;
             case Constants.LobbyBtn.Btn_Bingo:
                 {
-                    UnityToAndroid("jb_1");
+                    DoBuy("jb_1");
+                }
+                break;
+            case Constants.LobbyBtn.Btn_Sj:
+                {
+                    string uuid = GetUUID();
+                    DialogBase.Show("UUID", uuid);
                 }
                 break;
             default:
@@ -201,30 +208,64 @@ public class Reception : MonoBehaviour
                 break;
         }
     }
-    private void UnityToAndroid(string buykey)
+    private void DoBuy(string buykey)
     {
-        AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-        if (jc == null)
+        if (Application.platform == RuntimePlatform.Android)
         {
-            DialogBase.Show("ANDROID", "js is null");
-            return;
-        }
+            AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            if (jc == null)
+            {
+                DialogBase.Show("ANDROID", "js is null");
+                return;
+            }
 
-        AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
-        if (jo == null)
-        {
-            DialogBase.Show("ANDROID", "jo is null");
-            return;
+            AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
+            if (jo == null)
+            {
+                DialogBase.Show("ANDROID", "jo is null");
+                return;
+            }
+
+            try
+            {
+                //string uuid = jo.CallStatic<string>("GetUUID");
+                jo.Call("Pay", buykey);
+            }
+            catch (System.Exception e)
+            {
+                DialogBase.Show("ANDROID", e.Message);
+            }
         }
-        
-        try
+    }
+    private string GetUUID()
+    {
+        if (Application.platform == RuntimePlatform.Android)
         {
-            jo.Call("Pay", buykey);
+            AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            if (jc == null)
+            {
+                DialogBase.Show("ANDROID", "js is null");
+                return "";
+            }
+
+            AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
+            if (jo == null)
+            {
+                DialogBase.Show("ANDROID", "jo is null");
+                return "";
+            }
+
+            try
+            {
+                string uuid = jo.Call<string>("GetUID");
+                return uuid;
+            }
+            catch (System.Exception e)
+            {
+                DialogBase.Show("ANDROID", e.Message);
+            }
         }
-        catch (System.Exception e)
-        {
-            DialogBase.Show("ANDROID", e.Message);
-        }
+        return "";
     }
     void ShowPersonalInfoDlg()
     {
@@ -325,7 +366,7 @@ public class Reception : MonoBehaviour
     {
         // 初始显示第一页
         LongArray fIdArray = Lobby.getInstance().GetCurrentFriendPageArray();
-        Debug.Log("Friend summary count:" + fIdArray.Data.Count);
+        DebugConsole.Log("Friend summary count:" + fIdArray.Data.Count);
 
         m_net.SendEnqueue(Constants.Lion_GetFriendSummary,
             0,
@@ -376,7 +417,7 @@ public class Reception : MonoBehaviour
         // 个人信息对话框
         GameObject go = GameObject.Find("InputNickName");
         if (go == null)
-            Debug.Log("InputNickName is null");
+            DebugConsole.Log("InputNickName is null");
         else
         {
             InputField field = go.GetComponent<InputField>();
@@ -392,21 +433,47 @@ public class Reception : MonoBehaviour
         LionUserInfo ui = Lobby.getInstance().UserInfo;
         ui.Name = m_nick;
     }
-    void AfterUpdateProfileHeadImgUrl()
-    {
-        string headStr = "Head" + m_headImgUrl;
-        GameObject goSrc =
-            DialogSelectAvatar.GetInstance().transform.Find("main").
-            transform.Find("Avatars").
-            transform.Find("GridLayeout").
-            transform.Find(headStr).gameObject;
+    public void AfterUpdateProfileHeadImgUrl()
+    {        
+        GameObject goSrc = DialogSelectAvatar.GetHeadObject(m_headImgUrl);
 
-        Lobby.getInstance().UserInfo.HeadImgUrl = m_headImgUrl;
-        GameObject goDest =
-           DialogPersonalInfo.GetInstance().transform.Find("main").
-           transform.Find("BtnUpAvatar").gameObject;
-        goDest.GetComponent<Image>().sprite = goSrc.GetComponent<Image>().sprite;
-        GameObject.Find("BtnAvatar").transform.Find("BtnHead").GetComponent<Image>().sprite = goSrc.GetComponent<Image>().sprite;
+        if (goSrc != null)
+        {
+            Lobby.getInstance().UserInfo.HeadImgUrl = m_headImgUrl;
+            GameObject goDest =
+               DialogPersonalInfo.GetInstance().transform.Find("main").
+               transform.Find("BtnUpAvatar").gameObject;
+            goDest.GetComponent<Image>().sprite = goSrc.GetComponent<Image>().sprite;
+            GameObject.Find("BtnAvatar").transform.Find("BtnHead").GetComponent<Image>().sprite = goSrc.GetComponent<Image>().sprite;
+        }
+        else
+        {
+            GameObject goHeadDefault = GameObject.Find("BtnAvatar").transform.Find("BtnHeadDefault").gameObject;
+            GameObject goDest =
+               DialogPersonalInfo.GetInstance().transform.Find("main").
+               transform.Find("BtnUpAvatar").gameObject;
+            goDest.GetComponent<Image>().sprite = goHeadDefault.GetComponent<Image>().sprite;
+            GameObject.Find("BtnAvatar").transform.Find("BtnHead").GetComponent<Image>().sprite = goHeadDefault.GetComponent<Image>().sprite;
+        }
+    }
+    public void BuyItem(string packageName, 
+        string sku, 
+        string token, 
+        string orderId)
+    {
+        // Android buyType = "GooglePlay"
+        string androidBuyType = "GooglePlay";
+        StringArray sa = new StringArray();
+        sa.Data.Add(androidBuyType);
+        sa.Data.Add(packageName);
+        sa.Data.Add(sku);
+        sa.Data.Add(token);
+        sa.Data.Add(orderId);
+
+        m_net.SendEnqueue(Constants.Lion_BuyItem,
+            0,
+            sa,
+            null);
     }
     public void UpdateProfileName(string nickName)
     {
@@ -494,20 +561,10 @@ public class Reception : MonoBehaviour
         if (ui.HeadImgUrl != "")
         {
             m_headImgUrl = ui.HeadImgUrl;
-            int headIndex = 0;
-            try
-            {
-                headIndex = System.Convert.ToInt32(m_headImgUrl);
-            }
-            catch(System.Exception e)
-            {
-                Debug.Log(e.Message);
-            }
-
-            if (headIndex > 0)
-                AfterUpdateProfileHeadImgUrl();
+            //int headIndex = Tools.StringToInt32(m_headImgUrl);            
             //StartCoroutine(Tools.LoadWWWImageToButton(ui.HeadImgUrl, "BtnHead"));
         }
+        AfterUpdateProfileHeadImgUrl();
     }
     public void StartCountDown(long val)
     {
@@ -525,7 +582,7 @@ public class Reception : MonoBehaviour
         long epoch = Lobby.getInstance().FreeBonusEpoch;
         if (epoch < 0)
         {
-            Debug.Log("epoch < 0");
+            DebugConsole.Log("epoch < 0");
             return;
         }
 
@@ -568,12 +625,12 @@ public class Reception : MonoBehaviour
         {
             if (DialogBase.Actived())
             {
-                Debug.Log("Hide");
+                DebugConsole.Log("Hide");
                 DialogBase.Hide();
             }
             else
             {
-                Debug.Log("Show");
+                DebugConsole.Log("Show");
                 DialogBase.Show("ESC", "Are you sure to exit game?", QuitGame);
             }
         }
@@ -594,7 +651,7 @@ public class Reception : MonoBehaviour
         ProtoPacket packet = new ProtoPacket();
         if (m_net.RecvTryDequeue(ref packet))
         {
-            Debug.Log("Reception handle cmdId:" + packet.cmdId);
+            DebugConsole.Log("Reception handle cmdId:" + packet.cmdId);
             switch (packet.cmdId)
             {
                 case Constants.Lion_QuickLoginInfo:
@@ -650,7 +707,7 @@ public class Reception : MonoBehaviour
                 case Constants.Lion_GetFriendSummary:
                     {
                         Lobby.getInstance().CurrentSummaryList = (FriendSummaryList)packet.proto;
-                        Debug.Log("Summary count:" + Lobby.getInstance().CurrentSummaryList.Data.Count);
+                        DebugConsole.Log("Summary count:" + Lobby.getInstance().CurrentSummaryList.Data.Count);
                         if (packet.callback != null)
                         {
                            packet.callback();
@@ -672,7 +729,7 @@ public class Reception : MonoBehaviour
                         }
                         else
                         {
-                            Debug.Log(stat.Desc);
+                            DebugConsole.Log(stat.Desc);
                         }
                     }
                     break;
@@ -681,14 +738,14 @@ public class Reception : MonoBehaviour
                         Lobby.getInstance().RedirectInfo = (RedirectResp)packet.proto;
                         // 切换到游戏场景中
                         m_net.Close();
-                        Debug.Log("Reception enter slot scene");
+                        DebugConsole.Log("Reception enter slot scene");
                         Global.NextSceneName = "slot";
                         SceneManager.LoadScene("loading");
                     }
                     break;
                 case Constants.Lion_UpdateProfile:
                     {
-                        Debug.Log("Lion_UpdateProfile");
+                        DebugConsole.Log("Lion_UpdateProfile");
                         Status stat = (Status)packet.proto;
                         if (stat.Code == 0)// successful
                         {
@@ -699,7 +756,7 @@ public class Reception : MonoBehaviour
                         }
                         else
                         {
-                            Debug.Log(stat.Desc);
+                            DebugConsole.Log(stat.Desc);
                         }
                     }
                     break;
@@ -751,6 +808,24 @@ public class Reception : MonoBehaviour
                         }
                     }
                     break;
+                case Constants.Lion_BuyItem:
+                    {
+                        Status stat = (Status)packet.proto;
+                        // 更新购买相关的：金币 or 背包
+                        DebugConsole.Log("Buy item return:" + stat.Code.ToString());
+                        if (stat.Code == 0)// successful
+                        {
+                            if (packet.callback != null)
+                            {
+                                packet.callback();
+                            }
+                        }
+                        else
+                        {
+                            DebugConsole.Log(stat.Desc);
+                        }                        
+                    }
+                    break;
                 case Constants.Lion_GetItems:
                     {
                         //
@@ -788,7 +863,7 @@ public class Reception : MonoBehaviour
                     break;
                 default:
                     {
-                        Debug.Log("Reception invalid cmdId:" + packet.cmdId);
+                        DebugConsole.Log("Reception invalid cmdId:" + packet.cmdId);
                     }
                     break;
             }

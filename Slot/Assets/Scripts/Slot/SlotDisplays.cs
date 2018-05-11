@@ -170,11 +170,11 @@ public class SlotDisplays : MonoBehaviour
         m_clerk.UId = usrInfo.UserId;
         if (m_clerk.Gold != 0 && m_clerk.Gold != usrInfo.Gold)
         {
-            Debug.Log("Gold cant match!!!");
+            DebugConsole.Log("Gold cant match!!!");
         }
         else
         {
-            Debug.Log("Gold can match!!!");
+            DebugConsole.Log("Gold can match!!!");
         }
         m_clerk.Gold = usrInfo.Gold;
         m_clerk.Login = true;
@@ -219,7 +219,7 @@ public class SlotDisplays : MonoBehaviour
             int pos = tigerResp.Pos[i];
             string name = "reel" + (i + 1).ToString();
             SlotReel reel = GameObject.Find(name).GetComponent<SlotReel>();
-            //Debug.Log("pos" + i.ToString() + ":" + pos.ToString());
+            //DebugConsole.Log("pos" + i.ToString() + ":" + pos.ToString());
 
             if (i == tigerResp.Pos.Count - 1)
             {
@@ -329,7 +329,7 @@ public class SlotDisplays : MonoBehaviour
 
         if (aud >= Constants.Audio.Audio_Max)
         {
-            Debug.Log("Ivalid audio enum");
+            DebugConsole.Log("Ivalid audio enum");
             return;
         }
 
@@ -341,7 +341,7 @@ public class SlotDisplays : MonoBehaviour
     {
         if (aud >= Constants.Audio.Audio_Max)
         {
-            Debug.Log("Ivalid audio enum");
+            DebugConsole.Log("Ivalid audio enum");
             return;
         }
 

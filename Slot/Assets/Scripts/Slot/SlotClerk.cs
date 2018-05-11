@@ -53,7 +53,7 @@ public class SlotClerk : MonoBehaviour {
         m_key = rr.Key;
         if (false == m_net.Init(rr.Domain, rr.Port))
         {
-            Debug.Log("Client init failed!");
+            DebugConsole.Log("Client init failed!");
         }
         /* 
         m_id = 123456;
@@ -61,7 +61,7 @@ public class SlotClerk : MonoBehaviour {
         // 启动登录
         if (false == m_net.Init("127.0.0.1", 1234))
         {
-            Debug.Log("Client init failed!");
+            DebugConsole.Log("Client init failed!");
         }
         */
         // 初始化Displays
@@ -103,12 +103,12 @@ public class SlotClerk : MonoBehaviour {
             //这个地方可以写“再按一次退出”的提示
             if (DialogBase.Actived())
             {
-                Debug.Log("Hide in Clerk");
+                DebugConsole.Log("Hide in Clerk");
                 DialogBase.Hide();
             }
             else
             {
-                Debug.Log("Show in Clerk");
+                DebugConsole.Log("Show in Clerk");
                 DialogBase.Show("ESC", "Exit game?", QuitGame);
             }
             //m_escapeTimes++;
@@ -139,7 +139,7 @@ public class SlotClerk : MonoBehaviour {
         int bi = (int)btnIndex;
         if (bi < 0 || bi >= Constants.Btn_Strings.Length)
         {
-            Debug.Log("Invalid bi:" + bi.ToString());
+            DebugConsole.Log("Invalid bi:" + bi.ToString());
             return;
         }
 
@@ -147,21 +147,21 @@ public class SlotClerk : MonoBehaviour {
         GameObject gameObj = GameObject.Find(btnName);
         if (null == gameObj)
         {
-            Debug.Log("Cant find gameObj:" + btnName);
+            DebugConsole.Log("Cant find gameObj:" + btnName);
             return;
         }
 
         Button btnUId = gameObj.GetComponent<Button>();
         if (null == btnUId)
         {
-            Debug.Log("Cant find btn:" + btnName);
+            DebugConsole.Log("Cant find btn:" + btnName);
             return;
         }
 
         Text text = btnUId.transform.Find("Text").GetComponent<Text>();
         if (null == text)
         {
-            Debug.Log("Cant find text:" + btnName);
+            DebugConsole.Log("Cant find text:" + btnName);
             return;
         }
 
