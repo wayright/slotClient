@@ -14,5 +14,3 @@ message LoginResp {
     int32 version = 1;
     int64 user_id = 2;
 }
-
-

@@ -5,6 +5,11 @@ package Lion.Proto;
 option java_package = "studio.first.proto.lion";
 option java_outer_classname = "LionProto";
 
+message RegisterReq {
+    int32 version = 1; // 2=邮箱注册
+    repeated string args = 2;
+}
+
 message LionUserInfo {
     int64 user_id = 1; // 玩家id
     int64 gold = 2; // 金币数
