@@ -54,6 +54,8 @@ public class DialogBase : MonoBehaviour {
 
     void OnClick(GameObject sender)
     {
+        Tools.PlayAudio(Constants.Audio.Audio_LobbyClickButton);
+
         if (sender.name == "Cancel" || sender.name == "Close")
         {
             string btnName = "DialogBase";
@@ -134,6 +136,8 @@ public class DialogBase : MonoBehaviour {
                 if (m_disappear > 0)
                 {
                     m_disappear -= Time.deltaTime;
+                    if (m_disappear < 0)
+                        m_disappear = 0;
                     float factor = m_disappear / s_InitScale;
                     m_dialog.transform.localScale = new Vector3(factor, factor, factor);
                 }
@@ -154,6 +158,8 @@ public class DialogBase : MonoBehaviour {
                 if (m_show > 0)
                 {
                     m_show -= Time.deltaTime;
+                    if (m_show < 0)
+                        m_show = 0;
                     float factor = (s_InitScale - m_show) / s_InitScale;
                     m_dialog.transform.localScale = new Vector3(factor, factor, factor);
                 }

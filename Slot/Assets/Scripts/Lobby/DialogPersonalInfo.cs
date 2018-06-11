@@ -9,15 +9,14 @@ public class DialogPersonalInfo : DialogBase
     public enum DialogBtn
     {
         Close = 0,
-        ProfileOn, ProfileOff,
-        RecordsOn, RecordsOff,
-        UpAvatar, UploadAvatar, // the same 
+        UpAvatar, 
+        ModifyPassword,
+        RegEmail,
         AddFriend, RemoveFriend,
     };
     public static string[] DialogBtnStrings = { "BtnDPClose",
-                            "BtnProfileOn", "BtnProfileOff",
-                            "BtnRecordsOn", "BtnRecordsOff",
-                            "BtnUpAvatar", "BtnUploadAvatar",
+                            "BtnUpAvatar", "BtnModifyPassword",
+                            "BtnRegEmail",
                             "BtnAddFriend", "BtnRemoveFriend"};
     public Dictionary<string, int> m_btnIndexDict = new Dictionary<string, int>();    
     public LionUserInfo UserInfo
@@ -27,8 +26,6 @@ public class DialogPersonalInfo : DialogBase
     }
 
     // buttons obj
-    GameObject profileOnObj, profileOffObj;
-    GameObject recordsOnObj, recordsOffObj;
     GameObject profileTabObj, recordsTabObj;
 
     // 区分自身还是其他人，区分朋友还是非朋友
@@ -38,22 +35,6 @@ public class DialogPersonalInfo : DialogBase
     // privates
     private bool m_profileOn = true;
     private LionUserInfo m_userInfo;
-    public int ActivePage
-    {
-        get 
-        {
-            if (m_profileOn)
-                return 0;
-            else
-                return 1;
-        }
-
-        set 
-        {
-            m_profileOn = (value == 0);
-            UpdateUI();
-        }
-    }
 
     public void InitBtn()
     {
@@ -91,7 +72,6 @@ public class DialogPersonalInfo : DialogBase
         // 以下几句注意顺序
         // 先设置用户信息
         dlg.UserInfo = usrInfo;
-        dlg.ActivePage = 0;
         dlg.DoShow(obj, str);
         dlg.UpdateUserInfo(); // 默认第一个页面
     }
@@ -140,6 +120,9 @@ public class DialogPersonalInfo : DialogBase
         // Like
         GameObject.Find("valLike").GetComponent<Text>().text = ui.Praise.ToString();
 
+        // UUID
+        GameObject.Find("valUId").GetComponent<Text>().text = ui.UserId.ToString();
+
         // 头像
         //if (ui.HeadImgUrl != "")
         {
@@ -161,34 +144,37 @@ public class DialogPersonalInfo : DialogBase
                 goDest.GetComponent<Image>().sprite = goHeadDefault.GetComponent<Image>().sprite;
             }
         }
+
+        Reception recp = GameObject.Find("Reception").GetComponent<Reception>();
+        recp.GetTigerStatInfo(m_userInfo.UserId, UpdateTigerStatUI);
     }
     
     void UpdateUI()
     {
-        if (profileOnObj == null)
+        if (profileTabObj == null)
             return;
 
-        profileOnObj.SetActive(!m_profileOn);
-        profileOffObj.SetActive(m_profileOn);
-        recordsOnObj.SetActive(m_profileOn);
-        recordsOffObj.SetActive(!m_profileOn);
-
-        profileTabObj.SetActive(m_profileOn);
-        recordsTabObj.SetActive(!m_profileOn);
+        //profileTabObj.SetActive(m_profileOn);
+        //recordsTabObj.SetActive(!m_profileOn);
 
         // 区分自己和他人
         bool isSelf = m_userInfo.UserId == Lobby.getInstance().UId;
-        otherObj.SetActive(!isSelf);
-        selfObj.SetActive(isSelf);
+        //otherObj.SetActive(!isSelf);
+        //selfObj.SetActive(isSelf);
 
         // 区分朋友
         bool isFriend = IsFriend();
-        otherObj.transform.Find("BtnAddFriend").gameObject.SetActive(!isFriend);
-        otherObj.transform.Find("BtnRemoveFriend").gameObject.SetActive(isFriend);
+        GameObject.Find("BtnAddFriend").GetComponent<Button>().interactable = !isSelf && !isFriend;
+        GameObject.Find("BtnRemoveFriend").GetComponent<Button>().interactable = !isSelf && isFriend;
 
-        otherObj.transform.Find("BtnGiveGifts").GetComponent<Button>().interactable = false;
-        otherObj.transform.Find("BtnGiveChips").GetComponent<Button>().interactable = false;
-        otherObj.transform.Find("BtnLike").GetComponent<Button>().interactable = false;
+        GameObject.Find("BtnModifyPassword").GetComponent<Button>().interactable =
+            isSelf && (GlobalVars.instance.LoginType == Constants.Login_Email);
+        GameObject.Find("BtnRegEmail").GetComponent<Button>().interactable =
+            isSelf && (GlobalVars.instance.LoginType == Constants.Login_UUID);
+
+        GameObject.Find("BtnGiveGifts").GetComponent<Button>().interactable = false;
+        GameObject.Find("BtnGiveChips").GetComponent<Button>().interactable = false;
+        GameObject.Find("BtnLike").GetComponent<Button>().interactable = false;        
     }
     bool IsFriend()
     {
@@ -244,6 +230,8 @@ public class DialogPersonalInfo : DialogBase
     }
     void OnClick(GameObject sender)
     {
+        Tools.PlayAudio(Constants.Audio.Audio_LobbyClickButton);
+
         DebugConsole.Log(sender.name);
         int btnIndex = GetBtn(sender.name);
         if (btnIndex < 0)
@@ -267,12 +255,7 @@ public class DialogPersonalInfo : DialogBase
                     }
                 }
                 break;
-            case DialogBtn.ProfileOff:
-            case DialogBtn.RecordsOff:
-                {
-                    // Do nothing
-                }
-                break;
+                /*
             case DialogBtn.ProfileOn:
             case DialogBtn.RecordsOn:
                 {
@@ -288,9 +271,8 @@ public class DialogPersonalInfo : DialogBase
                         UpdateUI();
                     }
                 }
-                break;
+                break;*/
             case DialogBtn.UpAvatar:
-            case DialogBtn.UploadAvatar:
                 {
                     //DebugConsole.Log("Upload...");
                     DialogSelectAvatar.Show(UpdateAvatar);
@@ -306,6 +288,16 @@ public class DialogPersonalInfo : DialogBase
                     DialogBase.Show("FRIEND REMOVE", "Are you sure to remove?", RemoveFriend);
                 }
                 break;
+            case DialogBtn.RegEmail:
+                {
+                    DialogRegEmail.Show();
+                }
+                break;
+            case DialogBtn.ModifyPassword:
+                {
+                    DialogModifyPass.Show();
+                }
+                break;
             default:
                 break;
         }       
@@ -315,11 +307,11 @@ public class DialogPersonalInfo : DialogBase
     {
         InitBtn();
 
-        profileOnObj = GameObject.Find(DialogBtnStrings[(int)DialogBtn.ProfileOn]);
-        profileOffObj = GameObject.Find(DialogBtnStrings[(int)DialogBtn.ProfileOff]);
+        //profileOnObj = GameObject.Find(DialogBtnStrings[(int)DialogBtn.ProfileOn]);
+        //profileOffObj = GameObject.Find(DialogBtnStrings[(int)DialogBtn.ProfileOff]);
 
-        recordsOnObj = GameObject.Find(DialogBtnStrings[(int)DialogBtn.RecordsOn]);
-        recordsOffObj = GameObject.Find(DialogBtnStrings[(int)DialogBtn.RecordsOff]);
+        //recordsOnObj = GameObject.Find(DialogBtnStrings[(int)DialogBtn.RecordsOn]);
+        //recordsOffObj = GameObject.Find(DialogBtnStrings[(int)DialogBtn.RecordsOff]);
 
         profileTabObj = GameObject.Find("ProfileTable");
         recordsTabObj = GameObject.Find("RecordsTable");

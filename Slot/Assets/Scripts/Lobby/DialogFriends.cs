@@ -136,7 +136,7 @@ public class DialogFriends : DialogBase
             GameObject go = friendRecords[i];
             go.SetActive(true);
             go.transform.Find("txtFriendName").GetComponent<Text>().text = fslist.Data[i].Name;
-            go.transform.Find("txtFriendLevel").GetComponent<Text>().text = "Lv." + fslist.Data[i].Level.ToString();
+            go.transform.Find("txtFriendLevel").GetComponent<Text>().text = fslist.Data[i].Level.ToString();
         }
 
         GameObject goLastPage = friendsTabObj.transform.Find(DialogBtnStrings[(int)DialogBtn.FriendLastPage]).gameObject;
@@ -189,7 +189,7 @@ public class DialogFriends : DialogBase
             GameObject go = records[i];
             go.SetActive(true);
             go.transform.Find("txtRequestName").GetComponent<Text>().text = fslist.Data[i].Name;
-            go.transform.Find("txtRequestLevel").GetComponent<Text>().text = "Lv." + fslist.Data[i].Level.ToString();
+            go.transform.Find("txtRequestLevel").GetComponent<Text>().text = fslist.Data[i].Level.ToString();
         }
 
         GameObject goLastPage = requestTabObj.transform.Find(DialogBtnStrings[(int)DialogBtn.RequestLastPage]).gameObject;
@@ -298,6 +298,8 @@ public class DialogFriends : DialogBase
     }
     void OnClick(GameObject sender)
     {
+        Tools.PlayAudio(Constants.Audio.Audio_LobbyClickButton);
+
         DebugConsole.Log(sender.name);
         int btnIndex = GetBtn(sender.name);
         if (btnIndex < 0)

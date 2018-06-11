@@ -19,11 +19,16 @@ public class SlotButtonEvents : MonoBehaviour {
             string btnName = Constants.Btn_Strings[i];
             m_btnIndexDict.Add(btnName, i);
             GameObject btnObj = GameObject.Find(btnName);
-            Button btn = btnObj.GetComponent<Button>();
-            btn.onClick.AddListener(delegate()
+            if (btnObj == null)
+                DebugConsole.Log(btnName);
+            if (btnObj != null)
             {
-                this.OnClick(btnObj);
-            });
+                Button btn = btnObj.GetComponent<Button>();
+                btn.onClick.AddListener(delegate()
+                {
+                    this.OnClick(btnObj);
+                });
+            }
         }
 
         m_clerk = GameObject.Find("SlotClerk").GetComponent<SlotClerk>();
@@ -31,6 +36,8 @@ public class SlotButtonEvents : MonoBehaviour {
 
     public void OnClick(GameObject sender)
     {
+        Tools.PlayAudio(Constants.Audio.Audio_LobbyClickButton);
+
         int btnIndex = GetBtnIndexFromName(sender.name);
         if (btnIndex < 0)
         {
@@ -57,13 +64,16 @@ public class SlotButtonEvents : MonoBehaviour {
                 break;
             case Constants.Btn.Btn_AutoSpin:
                 m_clerk.AutoSpin = !m_clerk.AutoSpin;
-                m_clerk.Displays.PlayAudio(Constants.Audio.Audio_Spin);
                 break;
             case Constants.Btn.Btn_Return:
-                m_clerk.Displays.PlayAudio(Constants.Audio.Audio_Spin);
                 m_clerk.Net.Close();
                 DebugConsole.Log("Slot enter lobby scene");
                 SceneManager.LoadScene("lobby");
+                break;
+            case Constants.Btn.Btn_Deposit:
+                {
+                    DialogStore.Show(0);
+                }
                 break;
             default:
                 break;
@@ -100,9 +110,7 @@ public class SlotButtonEvents : MonoBehaviour {
         }
 	}
     void OnButtonSpin()
-    {
-        m_clerk.Displays.PlayAudio(Constants.Audio.Audio_Spin);
-        
+    {        
         if (m_clerk.Spinning)
         {
             DebugConsole.Log("I'm spinning!");
@@ -129,7 +137,6 @@ public class SlotButtonEvents : MonoBehaviour {
     }
     void OnButtonBetAdd()
     {
-        m_clerk.Displays.PlayAudio(Constants.Audio.Audio_PlusMinus);
         int bet = m_clerk.Bet;
         if (bet == 30)
         {
@@ -143,7 +150,6 @@ public class SlotButtonEvents : MonoBehaviour {
     }
     void OnButtonBetMinus()
     {
-        m_clerk.Displays.PlayAudio(Constants.Audio.Audio_PlusMinus);
         int bet = m_clerk.Bet;
         if (bet == 10)
         {

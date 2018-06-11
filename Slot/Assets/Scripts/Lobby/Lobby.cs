@@ -22,10 +22,32 @@ public class Lobby{
     private FriendSummaryList m_curSummaryList;
     private long m_freeBonusEpoch = -1;
     private UserItemList m_userItemList;
+    private ShopList m_shopList;
+    private Queue<string> m_broadcastSysMsg = new Queue<string>();
     public UserItemList UserItemList
     {
         get { return m_userItemList; }
         set { m_userItemList = value; }
+    }
+    public ShopList ShopList
+    {
+        get { return m_shopList; }
+        set { m_shopList = value; }
+    }
+    public Queue<string> SystemMessage
+    {
+        get { return m_broadcastSysMsg; }
+    }
+    public void AddBroadcast(string str)
+    {
+        m_broadcastSysMsg.Enqueue(str);
+    }
+    public string GetBroadcast()
+    {
+        if (m_broadcastSysMsg.Count == 0)
+            return "";
+        else
+            return m_broadcastSysMsg.Dequeue();
     }
     public long FreeBonusEpoch
     {

@@ -10,17 +10,22 @@ public class DialogOption : DialogBase
         Close = 0,
         SEOn, SEOff,
         MusicOn, MusicOff,
-        NotifyOn, NotifyOff
+        NotifyOn, NotifyOff,
+        TestingOn, TestingOff,
+        SwitchUser,
     };
     public static string[] DialogBtnStrings = { "BtnDOClose",
                             "BtnSEOn", "BtnSEOff",
                             "BtnMusicOn", "BtnMusicOff",
-                            "BtnNotifyOn", "BtnNotifyOff"};
+                            "BtnNotifyOn", "BtnNotifyOff",
+                            "BtnTestingOn", "BtnTestingOff",
+                                              "BtnSwitchUser"};
     public Dictionary<string, int> m_btnIndexDict = new Dictionary<string, int>();
 
     GameObject musicOnObj, musicOffObj;
     GameObject seOnObj, seOffObj;
     GameObject notifyOnObj, notifyOffObj;
+    GameObject testingOnObj, testingOffObj;
 
     public void InitBtn()
     {
@@ -55,18 +60,35 @@ public class DialogOption : DialogBase
         DialogOption dlg = obj.GetComponent<DialogOption>();
         dlg.DoShow(obj, str);
     }
-    
-    void UpdateMusicUI()
+    void UpdateTestingUI()
     {
-        if (GlobalVars.instance.GetMusic())
-        {            
-            musicOnObj.SetActive(false);            
-            musicOffObj.SetActive(true);
+        if (GlobalVars.instance.Testing)
+        {
+            testingOnObj.SetActive(true);
+            testingOffObj.SetActive(false);
         }
         else
         {
+            testingOnObj.SetActive(false);
+            testingOffObj.SetActive(true);
+        }
+    }
+    void OnTesting(bool bOn)
+    {
+        GlobalVars.instance.Testing = bOn;
+        UpdateTestingUI();
+    }
+    void UpdateMusicUI()
+    {
+        if (GlobalVars.instance.GetMusic())
+        {
             musicOnObj.SetActive(true);
             musicOffObj.SetActive(false);
+        }
+        else
+        {
+            musicOnObj.SetActive(false);
+            musicOffObj.SetActive(true);
         }
     }
     void OnMusicOn()
@@ -83,13 +105,13 @@ public class DialogOption : DialogBase
     {
         if (GlobalVars.instance.GetSE())
         {
-            seOnObj.SetActive(false);
-            seOffObj.SetActive(true);
+            seOnObj.SetActive(true);
+            seOffObj.SetActive(false);
         }
         else
         {
-            seOnObj.SetActive(true);
-            seOffObj.SetActive(false);
+            seOnObj.SetActive(false);
+            seOffObj.SetActive(true);            
         }
     }
     void OnSEOn()
@@ -127,6 +149,8 @@ public class DialogOption : DialogBase
     }
     void OnClick(GameObject sender)
     {
+        Tools.PlayAudio(Constants.Audio.Audio_LobbyClickButton);
+
         DebugConsole.Log(sender.name);
         int btnIndex = GetBtn(sender.name);
         if (btnIndex < 0)
@@ -152,32 +176,48 @@ public class DialogOption : DialogBase
                 break;
             case DialogBtn.MusicOn:
                 {
-                    OnMusicOn();
+                    OnMusicOff();
                 }
                 break;
             case DialogBtn.MusicOff:
                 {
-                    OnMusicOff();
+                    OnMusicOn();
                 }
                 break;
             case DialogBtn.NotifyOn:
                 {
-                    OnNotifyOn();
+                    OnNotifyOff();
                 }
                 break;
             case DialogBtn.NotifyOff:
                 {
-                    OnNotifyOff();
+                    OnNotifyOn();
                 }
                 break;
             case DialogBtn.SEOn:
                 {
-                    OnSEOn();
+                    OnSEOff();
                 }
                 break;
             case DialogBtn.SEOff:
                 {
-                    OnSEOff();
+                    OnSEOn();
+                }
+                break;
+            case DialogBtn.TestingOff:
+                {
+                    OnTesting(true);
+                }
+                break;
+            case DialogBtn.TestingOn:
+                {
+                    OnTesting(false);
+                }
+                break;
+            case DialogBtn.SwitchUser:
+                {
+                    Reception recp = GameObject.Find("Reception").GetComponent<Reception>();
+                    recp.SwitchUser();
                 }
                 break;
             default:
@@ -198,10 +238,14 @@ public class DialogOption : DialogBase
         notifyOnObj = GameObject.Find(DialogBtnStrings[(int)DialogBtn.NotifyOn]);
         notifyOffObj = GameObject.Find(DialogBtnStrings[(int)DialogBtn.NotifyOff]);
 
+        testingOnObj = GameObject.Find(DialogBtnStrings[(int)DialogBtn.TestingOn]);
+        testingOffObj = GameObject.Find(DialogBtnStrings[(int)DialogBtn.TestingOff]);
+
         // 依据全局变量显示按钮
         UpdateMusicUI();
         UpdateSEUI();
         UpdateNotifyUI();
+        UpdateTestingUI();
 
         //Canvas canvas = GetComponent<Canvas>();
         //if (canvas == null)

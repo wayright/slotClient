@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+// just move the coin
 public class ExplodeCoin : MonoBehaviour {
     private float m_vHori = 0;
     //private float m_airResistance = 0;

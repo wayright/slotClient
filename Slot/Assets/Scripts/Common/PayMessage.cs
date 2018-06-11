@@ -12,6 +12,7 @@ public class PayMessage : MonoBehaviour {
     private int m_idx = -1;
 	// Use this for initialization
 	void Start () {
+        m_others = "";
 	}
 	// Update is called once per frame
 	void Update () {
@@ -22,7 +23,7 @@ public class PayMessage : MonoBehaviour {
     {        
         if (msg == "beginConsumeComplete")
         {
-            m_idx = 0;
+            m_idx = 1;
             return;
         }
         else if (msg == "endConsumeComplete")

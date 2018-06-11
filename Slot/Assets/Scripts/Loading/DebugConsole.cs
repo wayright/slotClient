@@ -59,7 +59,7 @@ public class DebugConsole : MonoBehaviour {
             }  
         }
 
-        if (mDirty)
+        if (GlobalVars.instance.Testing && mDirty)
         {
             mDirty = false;
             string[] temp = mLines.ToArray();

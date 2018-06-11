@@ -17,42 +17,84 @@ public class Reception : MonoBehaviour
     // 需要客户的基本信息
     //private int m_gold = 0; // 总金额
     //private int m_key = 0; // Key
-    private bool m_login; // 是否登录
-    private ProtoNet m_net; // 网络-Dog&Lion
+    static private bool m_login = false; // 是否登录
+    static private ProtoNet m_net = null; // 网络-Dog&Lion
     private Dictionary<string, int> m_btnIndexDict = new Dictionary<string, int>();
     private string m_nick; // 临时昵称名
     private string m_headImgUrl; // 临时头像url，如果数字为inddex
-
+    private string m_broadcastMsg = ""; // 当前广播内容
+    static public ProtoNet Net()
+    {
+        return m_net;
+    }
+    
     // Use this for initialization
 	void Start () {
-        m_login = false;
-
         // 初始化ProtoNet
-        m_net = new ProtoNet();
+        if (m_net == null)
+        {
+            m_login = false;
+            m_net = new ProtoNet();
 
-        // 增加前台支持的网络包类型
-        m_net.Add(Constants.Lion_QuickLoginInfo, LionUserInfo.Parser);
-        m_net.Add(Constants.Lion_Redirect, RedirectResp.Parser);
-        m_net.Add(Constants.Lion_GetProfile, LionUserInfo.Parser);
-        m_net.Add(Constants.Lion_UpdateProfile, Status.Parser);
-        m_net.Add(Constants.Lion_GetTigerStat, TigerStat.Parser);
-        m_net.Add(Constants.Lion_GetFriends, LongArray.Parser);
-        m_net.Add(Constants.Lion_GetFriendRequests, LongArray.Parser);
-        m_net.Add(Constants.Lion_AddFriend, Status.Parser);
-        m_net.Add(Constants.Lion_DeleteFriend, Status.Parser);
-        m_net.Add(Constants.Lion_AcceptFriend, Status.Parser);
-        m_net.Add(Constants.Lion_IgnoreFriend, Status.Parser);
-        m_net.Add(Constants.Lion_GetFriendSummary, FriendSummaryList.Parser);
-        m_net.Add(Constants.Lion_NotifyWeeklyLogin, IntValue.Parser);
-        m_net.Add(Constants.Lion_TakeLoginBonus, LongArray.Parser);
-        m_net.Add(Constants.Lion_NotifyFreeBonus, LongValue.Parser);
-        m_net.Add(Constants.Lion_TakeFreeBonus, LongArray.Parser);
-        m_net.Add(Constants.Lion_BuyItem, Status.Parser);
-        m_net.Add(Constants.Lion_GetItems, UserItemList.Parser);
-        m_net.Add(-2, null);
-        m_net.Add(Constants.Reconnect, null);
-        m_net.Add(Constants.Error, Status.Parser);
-        m_net.Name = "Reception";
+            // 增加前台支持的网络包类型
+            m_net.Add(Constants.Lion_QuickLoginInfo, LionUserInfo.Parser);
+            m_net.Add(Constants.Lion_Redirect, RedirectResp.Parser);
+            m_net.Add(Constants.Lion_GetProfile, LionUserInfo.Parser);
+            m_net.Add(Constants.Lion_UpdateProfile, Status.Parser);
+            m_net.Add(Constants.Lion_GetTigerStat, TigerStat.Parser);
+            m_net.Add(Constants.Lion_GetFriends, LongArray.Parser);
+            m_net.Add(Constants.Lion_GetFriendRequests, LongArray.Parser);
+            m_net.Add(Constants.Lion_AddFriend, Status.Parser);
+            m_net.Add(Constants.Lion_DeleteFriend, Status.Parser);
+            m_net.Add(Constants.Lion_AcceptFriend, Status.Parser);
+            m_net.Add(Constants.Lion_IgnoreFriend, Status.Parser);
+            m_net.Add(Constants.Lion_GetFriendSummary, FriendSummaryList.Parser);
+            m_net.Add(Constants.Lion_NotifyWeeklyLogin, IntValue.Parser);
+            m_net.Add(Constants.Lion_TakeLoginBonus, LongArray.Parser);
+            m_net.Add(Constants.Lion_NotifyFreeBonus, LongValue.Parser);
+            m_net.Add(Constants.Lion_TakeFreeBonus, LongArray.Parser);
+            m_net.Add(Constants.Lion_BuyItem, Status.Parser);
+            m_net.Add(Constants.Lion_GetItems, UserItemList.Parser);
+            m_net.Add(Constants.Lion_Register, Status.Parser);
+            m_net.Add(Constants.Lion_ModPass, Status.Parser);
+            m_net.Add(Constants.Lion_RefreshGold, LongValue.Parser);
+            m_net.Add(Constants.Lion_GetShopItems, ShopList.Parser);
+            m_net.Add(Constants.Lion_BroadcastSystemMessage, StringValue.Parser);
+
+            m_net.Add(-2, null);
+            m_net.Add(Constants.Reconnect, null);
+            m_net.Add(Constants.Error, Status.Parser);
+            m_net.Name = "Reception";  
+        }
+
+        if (!m_login)
+        {
+            // 启动登录
+            Lobby lobby = Lobby.getInstance();
+            DebugConsole.Log("Loading start:" + lobby.Domain);
+            if (lobby.Domain == "")
+            {
+                SceneManager.LoadSceneAsync("sloading");
+            }
+            else
+            {
+                DebugConsole.Log("Loading start2:" + lobby.Domain);
+                if (false == m_net.Init(lobby.Domain, lobby.Port))
+                {
+                    // 这里不重连，在发送请求失败后再重连
+                    DebugConsole.Log("Reception:Client init failed!");
+                }
+
+                QuickLogin();
+            }
+        }
+        else
+        {
+            UpdateUserInfoUI();
+        }
+
+        // 刷新倒计时
+        UpdateCountDown();
 
         for (int i = 0; i < Constants.LobbyBtn_Strings.Length; ++i)
         {
@@ -65,28 +107,6 @@ public class Reception : MonoBehaviour
                 this.OnClick(btnObj);
             });
         }
-
-        // 启动登录
-        Lobby lobby = Lobby.getInstance();
-        DebugConsole.Log("Loading start:" + lobby.Domain);
-        if (lobby.Domain == "")
-        {            
-            SceneManager.LoadSceneAsync("sloading");
-        }
-        else
-        {
-            DebugConsole.Log("Loading start2:" + lobby.Domain);
-            if (false == m_net.Init(lobby.Domain, lobby.Port))
-            {
-                // 这里不重连，在发送请求失败后再重连
-                DebugConsole.Log("Reception:Client init failed!");
-            }
-
-            QuickLogin();
-        }
-
-        // 刷新倒计时
-        UpdateCountDown();
 	}
     int GetBtnIndexFromName(string btnName)
     {
@@ -103,24 +123,19 @@ public class Reception : MonoBehaviour
     {
         Application.Quit();
     }
-    public void PlayAudio(Constants.Audio aud)
+    public void SwitchUser()
     {
-        if (!GlobalVars.instance.GetSE())
-            return;
+        m_net.Close();
+        m_net = null;
 
-        if (aud >= Constants.Audio.Audio_Max)
-        {
-            DebugConsole.Log("Ivalid audio enum");
-            return;
-        }
-
-        string audStr = Constants.Audio_Strings[(int)aud];
-        AudioSource aSource = GameObject.Find(audStr).GetComponent<AudioSource>();
-        aSource.Play();
+        GlobalVars.instance.SwitchUser = true;
+        DebugConsole.Log("Reception enter start loading scene");
+        Global.NextSceneName = "sloading";
+        SceneManager.LoadScene("loading");
     }
     void OnClick(GameObject sender)
     {        
-        PlayAudio(Constants.Audio.Audio_LobbyClickButton);
+        Tools.PlayAudio(Constants.Audio.Audio_LobbyClickButton);
 
         int btnIndex = GetBtnIndexFromName(sender.name);
         if (btnIndex < 0)
@@ -147,7 +162,7 @@ public class Reception : MonoBehaviour
                 break;
             case Constants.LobbyBtn.Btn_Poker:
                 {
-                    DialogBase.Show("POKER", "Exit game?", QuitGame);
+                    //DialogBase.Show("POKER", "Exit game?", QuitGame);
                 }
                 break;
             case Constants.LobbyBtn.Btn_Option:
@@ -187,20 +202,20 @@ public class Reception : MonoBehaviour
                     TakeFreeBonus();
                 }
                 break;
-            case Constants.LobbyBtn.Btn_MainReward: // Bag
+            case Constants.LobbyBtn.Btn_Bag: // Bag
                 {
                     GetItems();
                 }
                 break;
             case Constants.LobbyBtn.Btn_Bingo:
                 {
-                    DoBuy("jb_1");
+                    //DoBuy("jb_1");
                 }
                 break;
             case Constants.LobbyBtn.Btn_Sj:
                 {
-                    string uuid = GetUUID();
-                    DialogBase.Show("UUID", uuid);
+                    //string uuid = GetUUID();
+                    //DialogBase.Show("UUID", uuid);
                 }
                 break;
             default:
@@ -208,7 +223,17 @@ public class Reception : MonoBehaviour
                 break;
         }
     }
-    private void DoBuy(string buykey)
+    static public void GetShopItems(WorkDone cb)
+    {
+        StringValue sv = new StringValue();
+        string shopName = "GoldShop";
+        sv.Value = shopName;
+        m_net.SendEnqueue(Constants.Lion_GetShopItems,
+            0,
+            sv,
+            cb);
+    }
+    static public void DoBuy(string buykey)
     {
         if (Application.platform == RuntimePlatform.Android)
         {
@@ -266,6 +291,30 @@ public class Reception : MonoBehaviour
             }
         }
         return "";
+    }
+    public void RegisterByEmail(string email, string pwdMd5, WorkDone cb = null)
+    {
+        RegisterReq regReq = new RegisterReq();
+        regReq.Version = 2;
+        regReq.Args.Add(email);
+        regReq.Args.Add(pwdMd5);
+
+        m_net.SendEnqueue(Constants.Lion_Register,
+            0,
+            regReq,
+            cb);        
+    }
+    public void ModifyPassword(string pwdMd5, string npwdMd5, WorkDone cb = null)
+    {
+        RegisterReq regReq = new RegisterReq();
+        regReq.Version = 2;
+        regReq.Args.Add(pwdMd5);
+        regReq.Args.Add(npwdMd5);
+
+        m_net.SendEnqueue(Constants.Lion_ModPass,
+            0,
+            regReq,
+            cb);
     }
     void ShowPersonalInfoDlg()
     {
@@ -586,8 +635,11 @@ public class Reception : MonoBehaviour
             return;
         }
 
+        // add one second
+        epoch += 1000;
+
         long curEpoch = (System.DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000;
-        if (epoch == 0 || curEpoch > epoch)
+        if (epoch == 0 || curEpoch >= epoch)
         {
             EndCountDown();
         }
@@ -617,7 +669,25 @@ public class Reception : MonoBehaviour
     public void FlyCoin(int type)
     {
         GameObject go = GameObject.Find("BtnCredits");
-        ExplodeCoin.MoveTo(type, go.transform.position);
+        ExplodeCoin.MoveTo(type, go.transform.position);        
+    }
+    void JumpAndMoveCoins(int cc, WorkDone cb)
+    {
+        if (cc > 20)
+            cc = 20;
+
+        JumpCoin.Init(cb);
+        // 动态金币个数
+        JumpCoin.sTotalCoinCount = cc; // max 20
+        for (int i = 0; i < JumpCoin.sTotalCoinCount; ++i)
+        {
+            string jcName = "JumpCoin" + (i + 1).ToString();
+            GameObject goJc = GameObject.Find("JumpCoins").transform.Find("Group").transform.Find(jcName).gameObject;
+            goJc.SetActive(true);
+
+            JumpCoin jc = goJc.GetComponent<JumpCoin>();
+            jc.JumpAndMove();
+        }
     }
 	// Update is called once per frame
 	void Update () {
@@ -634,8 +704,31 @@ public class Reception : MonoBehaviour
                 DialogBase.Show("ESC", "Are you sure to exit game?", QuitGame);
             }
         }
+        
+        if (m_broadcastMsg != "")
+        { 
+            // 有系统消息，平移吧            
+            GameObject goBroadcast = GameObject.Find("BroadcastText");
+            Vector3 pos = goBroadcast.transform.localPosition;
+            pos.x -= 50 * Time.deltaTime;
+            goBroadcast.transform.localPosition = pos;
 
-        if (!m_net.IsRunning())
+            // 从600～-600
+            if (goBroadcast.transform.localPosition.x < -600)
+                m_broadcastMsg = "";
+        }
+        else
+        {
+            m_broadcastMsg = Lobby.getInstance().GetBroadcast();
+            if (m_broadcastMsg != "")
+            {
+                GameObject goBroadcast = GameObject.Find("BroadcastText");
+                goBroadcast.GetComponent<Text>().text = m_broadcastMsg;
+                goBroadcast.transform.localPosition = new Vector3(600, 0, 0);
+            }
+        }
+
+        if (m_net == null || !m_net.IsRunning())
         {
             // 主动结束了
             return;
@@ -737,7 +830,7 @@ public class Reception : MonoBehaviour
                     {
                         Lobby.getInstance().RedirectInfo = (RedirectResp)packet.proto;
                         // 切换到游戏场景中
-                        m_net.Close();
+                        //m_net.Close();
                         DebugConsole.Log("Reception enter slot scene");
                         Global.NextSceneName = "slot";
                         SceneManager.LoadScene("loading");
@@ -767,7 +860,7 @@ public class Reception : MonoBehaviour
                         IntValue iv = (IntValue)packet.proto;
                         DialogDailyBonus.Show(iv.Value);
 
-                        ExplodeCoin.Show();
+                        //ExplodeCoin.Show();
                     }
                     break;
                 case Constants.Lion_TakeLoginBonus:
@@ -779,8 +872,7 @@ public class Reception : MonoBehaviour
                         {
                             Lobby.getInstance().UserInfo.Gold = la.Data[1];
                             // 若有动画，在此添加
-                            FlyCoin(Constants.Bonus_Daily);
-                            UpdateUserInfoUI();
+                            JumpAndMoveCoins(6, UpdateUserInfoUI);
                         }
                     }
                     break;
@@ -792,7 +884,6 @@ public class Reception : MonoBehaviour
                         LongValue lv = (LongValue)packet.proto;
                         long curEpoch = (System.DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000;
                         Lobby.getInstance().FreeBonusEpoch = curEpoch + lv.Value;
-
                         UpdateCountDown();
                     }
                     break;
@@ -824,6 +915,67 @@ public class Reception : MonoBehaviour
                         {
                             DebugConsole.Log(stat.Desc);
                         }                        
+                    }
+                    break;
+                case Constants.Lion_Register:
+                    {
+                        Status stat = (Status)packet.proto;
+                        DebugConsole.Log("Register by email return:" + stat.Code.ToString());
+                        if (stat.Code == 0)// successful
+                        {
+                            if (packet.callback != null)
+                            {
+                                packet.callback();
+                            }
+                        }
+                        else
+                        {
+                            DebugConsole.Log(stat.Desc);
+                            DialogBase.Show("Register by email", "Error:" + stat.Desc);
+                        }                
+                    }
+                    break;
+                case Constants.Lion_ModPass:
+                    {
+                        Status stat = (Status)packet.proto;
+                        DebugConsole.Log("Modify password return:" + stat.Code.ToString());
+                        if (stat.Code == 0)// successful
+                        {
+                            if (packet.callback != null)
+                            {
+                                packet.callback();
+                            }
+                        }
+                        else
+                        {
+                            DebugConsole.Log(stat.Desc);
+                            DialogBase.Show("Modify password", "Error:" + stat.Desc);
+                        }
+                    }
+                    break;
+                case Constants.Lion_RefreshGold:
+                    {
+                        LongValue lv = (LongValue)packet.proto;
+                        DebugConsole.Log("Refresh gold:" + lv.ToString());
+                        Lobby.getInstance().UserInfo.Gold = lv.Value;
+                        UpdateUserInfoUI();
+                    }
+                    break;
+                case Constants.Lion_GetShopItems:
+                    {
+                        Lobby.getInstance().ShopList = (ShopList)packet.proto;
+                        DebugConsole.Log("ShopName:" + Lobby.getInstance().ShopList.ShopName);
+                        if (packet.callback != null)
+                        {
+                            packet.callback();
+                        }
+                    }
+                    break;
+                case Constants.Lion_BroadcastSystemMessage:
+                    {
+                        Tools.PlayNotification(Constants.Audio.Audio_Notification);
+                        StringValue sv = (StringValue)packet.proto;
+                        Lobby.getInstance().AddBroadcast(sv.Value);
                     }
                     break;
                 case Constants.Lion_GetItems:

@@ -89,9 +89,11 @@ public class SlotDisplays : MonoBehaviour
     {
         // 隐藏金币
         GameObject gameObj = GameObject.Find("Coin");
-        Image img = gameObj.GetComponent<Image>();
-        img.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
-
+        if (gameObj != null)
+        {
+            Image img = gameObj.GetComponent<Image>();
+            img.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+        }
         m_dw.Elapse = 0;
     }
 
@@ -314,9 +316,12 @@ public class SlotDisplays : MonoBehaviour
 
             // 隐藏金币
             GameObject coin = GameObject.Find("Coin");
-            Image coinImg = coin.GetComponent<Image>();
-            coinImg.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
-            coin.transform.localPosition = new Vector3(385, -379, 0);
+            if (coin != null)
+            {
+                Image coinImg = coin.GetComponent<Image>();
+                coinImg.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+                coin.transform.localPosition = new Vector3(385, -379, 0);
+            }
         }
 
         StopCoroutine(JumpWinNumber(data));

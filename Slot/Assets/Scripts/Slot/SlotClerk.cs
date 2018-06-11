@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using Login.Proto;
 using Tiger.Proto;
+using Lion.Proto;
+using Common.Proto;
 
 public class SlotClerk : MonoBehaviour {
 
@@ -24,6 +26,7 @@ public class SlotClerk : MonoBehaviour {
     private bool m_spinning = false; // 是否正在摇
     private bool m_autoSpin = false; // 自动摇奖
     //private int m_escapeTimes = 1; // 退出
+    private string m_broadcastMsg = "";
     public Dictionary<int, int> CallbackDict = new Dictionary<int,int>();
     private System.Diagnostics.Stopwatch m_stopWatch = new System.Diagnostics.Stopwatch();
 
@@ -132,8 +135,72 @@ public class SlotClerk : MonoBehaviour {
         {
            m_displays.Execute(packet);
         }
-	}
 
+        GameObject recp = GameObject.Find("Reception");
+        if (recp == null)
+        {
+            if (m_broadcastMsg != "")
+            {
+                // 有系统消息，平移吧            
+                GameObject goBroadcast = GameObject.Find("BroadcastText");
+                Vector3 pos = goBroadcast.transform.localPosition;
+                pos.x -= 50 * Time.deltaTime;
+                goBroadcast.transform.localPosition = pos;
+
+                // 从600～-600
+                if (goBroadcast.transform.localPosition.x < -600)
+                    m_broadcastMsg = "";
+            }
+            else
+            {
+                m_broadcastMsg = Lobby.getInstance().GetBroadcast();
+                if (m_broadcastMsg != "")
+                {
+                    GameObject goBroadcast = GameObject.Find("BroadcastText");
+                    goBroadcast.GetComponent<Text>().text = m_broadcastMsg;
+                    goBroadcast.transform.localPosition = new Vector3(600, 0, 0);
+                }
+            }
+
+            // 不是Lobby，需要处理Reception消息
+            // 如广播，以及store相关的
+            ProtoNet net = Reception.Net();
+            if (net != null)
+            {
+                packet = null;
+                packet = new ProtoPacket();
+                if (net.RecvTryDequeue(ref packet))
+                {
+                    switch (packet.cmdId)
+                    {
+                        case Constants.Lion_GetShopItems:
+                            {
+                                Lobby.getInstance().ShopList = (ShopList)packet.proto;
+                                DebugConsole.Log("ShopName:" + Lobby.getInstance().ShopList.ShopName);
+                                if (packet.callback != null)
+                                {
+                                    packet.callback();
+                                }
+                            }
+                            break;
+                        case Constants.Lion_BroadcastSystemMessage:
+                            {
+                                Tools.PlayNotification(Constants.Audio.Audio_Notification);
+                                StringValue sv = (StringValue)packet.proto;
+                                Lobby.getInstance().AddBroadcast(sv.Value);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+	}
+    void OnTextChanged(string txtName, long value)
+    {
+        GameObject.Find(txtName).GetComponent<Text>().text = Tools.CoinToString(value);
+    }
     void OnBtnChanged(Constants.Btn btnIndex, long value)
     {
         int bi = (int)btnIndex;
@@ -184,17 +251,17 @@ public class SlotClerk : MonoBehaviour {
     public int Lines 
     {
         get { return m_lines; }
-        set { m_lines = value; OnBtnChanged(Constants.Btn.Btn_Lines, m_lines); }
+        set { m_lines = value; /*OnBtnChanged(Constants.Btn.Btn_Lines, m_lines);*/ }
     }
     public int Bet 
     {
         get { return m_bet; }
-        set { m_bet = value; OnBtnChanged(Constants.Btn.Btn_Bet, m_bet); }
+        set { m_bet = value; OnTextChanged("totalBetText", m_bet); }
     }
     public long UId
     {
         get { return m_id; }
-        set { m_id = value; OnBtnChanged(Constants.Btn.Btn_UId, m_id); }
+        set { m_id = value; /*OnBtnChanged(Constants.Btn.Btn_UId, m_id);*/ }
     }
     public int SpinCount
     {
@@ -219,12 +286,12 @@ public class SlotClerk : MonoBehaviour {
     public long Gold 
     {
         get { return m_gold; }
-        set { m_gold = value; OnBtnChanged(Constants.Btn.Btn_UGold, m_gold); }
+        set { m_gold = value; OnTextChanged("uGoldText", m_gold); }
     }
     public long Win
     {
         get { return m_win; }
-        set { m_win = value; OnBtnChanged(Constants.Btn.Btn_Win, m_win); }
+        set { m_win = value; OnTextChanged("winText", m_win); }
     }
     public ProtoNet Net
     {

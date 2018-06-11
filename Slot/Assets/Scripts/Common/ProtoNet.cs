@@ -85,6 +85,10 @@ public class ProtoNet
     {
         return m_running;
     }
+    ~ProtoNet()
+    {
+        Close();
+    }
 
     /// <summary>  
     /// 外部调用的重连

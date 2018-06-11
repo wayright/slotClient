@@ -57,6 +57,8 @@ public class DialogDailyBonus : DialogBase
     
     void OnClick(GameObject sender)
     {
+        Tools.PlayAudio(Constants.Audio.Audio_LobbyClickButton);
+
         DebugConsole.Log(sender.name);
         int btnIndex = GetBtn(sender.name);
         if (btnIndex < 0)
@@ -81,7 +83,18 @@ public class DialogDailyBonus : DialogBase
                 }
                 break;
             case DialogBtn.Collect:
-                {                  
+                {
+                    GameObject btnObj = GameObject.Find(DialogName);
+                    if (null == btnObj)
+                    {
+                        DebugConsole.Log("null");
+                    }
+                    else
+                    {
+                        DebugConsole.Log("DoHide");
+                        DoHide(btnObj);
+                    }
+
                     Reception recp = GameObject.Find("Reception").GetComponent<Reception>();
                     recp.TakeLoginBonus();
                 }

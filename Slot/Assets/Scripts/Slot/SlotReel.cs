@@ -200,23 +200,30 @@ public class SlotReel : MonoBehaviour
 	void Update () {
         // 检查金币
         GameObject coin = GameObject.Find("Coin");
-        Image coinImg = coin.GetComponent<Image>();
-        Color col = coinImg.color;
-        if (col.a > 0.0f)
+        Image coinImg = null;
+        if (coin != null)
+            coinImg = coin.GetComponent<Image>();
+
+        Color col = new Color();
+        if (coinImg != null && false)
         {
-            if (coinImg.transform.localPosition.y >= 480)
+            col = coinImg.color;
+            if (col.a > 0.0f)
             {
-                // 几乎消失
-                coin.transform.localPosition = new Vector3(385, -379, 0);
-                coinImg.color = new Color(1.0f, 1.0f, 1.0f, 0.01f);
-            }
-            else
-            {                
-                // 移动吧！
-                float step = 100 * Time.deltaTime;
-                coin.transform.localPosition =
-                    Vector3.MoveTowards(coin.transform.localPosition,
-                    new Vector3(146, 486, 0), step); 
+                if (coinImg.transform.localPosition.y >= 480)
+                {
+                    // 几乎消失
+                    coin.transform.localPosition = new Vector3(385, -379, 0);
+                    coinImg.color = new Color(1.0f, 1.0f, 1.0f, 0.01f);
+                }
+                else
+                {
+                    // 移动吧！
+                    float step = 100 * Time.deltaTime;
+                    coin.transform.localPosition =
+                        Vector3.MoveTowards(coin.transform.localPosition,
+                        new Vector3(146, 486, 0), step);
+                }
             }
         }
 
@@ -279,7 +286,7 @@ public class SlotReel : MonoBehaviour
             else
             {
                 // 开始飞跃金币
-                if (col.a == 0.0f)
+                if (col.a == 0.0f && coinImg != null)
                 {
                     //m_clerk.Displays.PlayAudio(Constants.Audio.Audio_CoinFly);
                     coinImg.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
